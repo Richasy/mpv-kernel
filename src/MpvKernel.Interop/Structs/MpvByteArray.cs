@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Richasy. All rights reserved.
 
-using System;
 using System.Runtime.InteropServices;
 
 namespace Richasy.MpvKernel;

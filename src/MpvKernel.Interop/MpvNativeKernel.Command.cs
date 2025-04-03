@@ -6,7 +6,7 @@ using static Richasy.MpvKernel.Constants;
 
 namespace Richasy.MpvKernel;
 
-public sealed partial class MpvNativeKernel
+public static partial class MpvNativeKernel
 {
     /// <summary>
     /// Send a command to the player. Commands are the same as those used in

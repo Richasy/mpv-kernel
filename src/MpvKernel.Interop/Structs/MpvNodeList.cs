@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿// Copyright (c) Richasy. All rights reserved.
+// Licensed under the MIT License.
+
 using System.Runtime.InteropServices;
 
 namespace Richasy.MpvKernel;
@@ -42,6 +44,11 @@ public struct MpvNodeList
     /// </summary>
     public Dictionary<string, MpvNodeList>? ValuesMap => this.ToDictionary();
 
+    /// <summary>
+    /// Initializes a new instance of MpvNodeList using an array of existing MpvNodeList instances. Allocates memory for
+    /// the nodes.
+    /// </summary>
+    /// <param name="values">An array of existing instances is used to populate the new instance and allocate the necessary memory.</param>
     public MpvNodeList(params MpvNodeList[] values)
     {
         Num = values.Length;
@@ -50,6 +57,10 @@ public struct MpvNodeList
             Marshal.StructureToPtr(values[i], _nodesPtr + (i * Marshal.SizeOf<MpvNodeList>()), false);
     }
 
+    /// <summary>
+    /// Initializes a new instance of MpvNodeList using a dictionary of string keys and MpvNodeList values.
+    /// </summary>
+    /// <param name="values">The dictionary provides key-value pairs where each key is a string and each value is an MpvNodeList.</param>
     public MpvNodeList(Dictionary<string, MpvNodeList> values)
     {
         Num = values.Count;

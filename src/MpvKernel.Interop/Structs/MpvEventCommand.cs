@@ -2,6 +2,9 @@
 
 namespace Richasy.MpvKernel;
 
+/// <summary>
+/// Mpv event command.
+/// </summary>
 [StructLayout(LayoutKind.Sequential, Size = 16)]
 public struct MpvEventCommand
 {
@@ -13,5 +16,5 @@ public struct MpvEventCommand
     /// <para>in case of success. Most commands leave it at Mpv_FORMAT_NONE. Set</para>
     /// <para>to Mpv_FORMAT_NONE on failure.</para>
     /// </summary>
-    public MpvNode Result => Marshal.PtrToStructure<MpvNode>(_resultPtr);
+    public readonly MpvNode Result => Marshal.PtrToStructure<MpvNode>(_resultPtr);
 }

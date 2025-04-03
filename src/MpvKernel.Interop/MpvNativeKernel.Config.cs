@@ -6,7 +6,7 @@ using static Richasy.MpvKernel.Constants;
 
 namespace Richasy.MpvKernel;
 
-public sealed partial class MpvNativeKernel
+public static partial class MpvNativeKernel
 {
     /// <summary>
     /// Load a config file.

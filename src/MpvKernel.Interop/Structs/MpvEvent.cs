@@ -1,8 +1,11 @@
-﻿using System.Runtime.InteropServices;
-using Mpv.Core.Enums.Client;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
 
 namespace Richasy.MpvKernel;
 
+/// <summary>
+/// Mpv event.
+/// </summary>
 [StructLayout(LayoutKind.Sequential)]
 public partial struct MpvEvent
 {
@@ -71,5 +74,5 @@ public partial struct MpvEvent
     /// <para>Note: future enhancements might add new event structs for existing or new</para>
     /// <para>event types.</para>
     /// </remarks>
-    public T GetData<T>() where T : struct => Marshal.PtrToStructure<T>(DataPtr);
+    public T GetData<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)] T>() where T : struct => Marshal.PtrToStructure<T>(DataPtr);
 }

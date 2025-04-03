@@ -439,6 +439,9 @@ dotnet_diagnostic.CA5392.severity = none
 # CA1720: 标识符包含类型名称
 dotnet_diagnostic.CA1720.severity = none
 
+# CA1819: 属性不应返回数组
+dotnet_diagnostic.CA1819.severity = none
+
 [*.{cs,vb}]
 dotnet_style_qualification_for_field = false:silent
 dotnet_style_qualification_for_property = false:silent

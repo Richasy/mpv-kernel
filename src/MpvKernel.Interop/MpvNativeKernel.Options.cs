@@ -6,7 +6,7 @@ using static Richasy.MpvKernel.Constants;
 
 namespace Richasy.MpvKernel;
 
-public sealed partial class MpvNativeKernel
+public static partial class MpvNativeKernel
 {
     /// <summary>
     /// Set an option. Note that you can't normally set options during runtime. It
@@ -34,7 +34,7 @@ public sealed partial class MpvNativeKernel
     /// <param name="format">See enum mpv_format.</param>
     /// <param name="data">Option value (according to the format).</param>
     /// <returns>Error code.</returns>
-    [LibraryImport(MpvLibraryName, EntryPoint = "mpv_set_option")]
+    [LibraryImport(MpvLibraryName, EntryPoint = "mpv_set_option", StringMarshalling = StringMarshalling.Utf8)]
     public static partial MpvError SetOption(MpvInteropHandle handle, string name, MpvFormat format, ref MpvNode data);
 
     /// <summary>

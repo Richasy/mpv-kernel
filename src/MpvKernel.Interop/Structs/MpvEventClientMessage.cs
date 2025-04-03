@@ -2,6 +2,9 @@
 
 namespace Richasy.MpvKernel;
 
+/// <summary>
+/// Message.
+/// </summary>
 [StructLayout(LayoutKind.Sequential, Size = 16)]
 public struct MpvEventClientMessage
 {
@@ -12,10 +15,14 @@ public struct MpvEventClientMessage
     /// <para>None of the valid items are NULL.</para>
     /// </summary>
     public int NumArgs;
-    
+
     internal IntPtr _argsPtr; //Array of IntPtrs/UTF8 strings
-    
-    public string[] Args => GetArgs();
+
+    /// <summary>
+    /// Returns an array of strings representing the arguments. The arguments are retrieved by calling the GetArgs
+    /// method.
+    /// </summary>
+    public List<string> Args => [.. GetArgs()];
 
     private string[] GetArgs()
     {

@@ -1,8 +1,10 @@
 ﻿using System.Runtime.InteropServices;
-using Mpv.Core.Enums.Client;
 
 namespace Richasy.MpvKernel;
 
+/// <summary>
+/// Mpv event end file.
+/// </summary>
 [StructLayout(LayoutKind.Sequential, Size = 32)]
 public struct MpvEventEndFile
 {
