@@ -6,7 +6,7 @@ using static Richasy.MpvKernel.Constants;
 
 namespace Richasy.MpvKernel;
 
-public static partial class MpvNativeKernel
+public static partial class MpvNative
 {
     /// <summary>
     /// Set a property to a given value. Properties are essentially variables which

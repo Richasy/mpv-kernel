@@ -442,6 +442,18 @@ dotnet_diagnostic.CA1720.severity = none
 # CA1819: 属性不应返回数组
 dotnet_diagnostic.CA1819.severity = none
 
+# CA1032: 实现标准异常构造函数
+dotnet_diagnostic.CA1032.severity = none
+
+# RCS1194: Implement exception constructors
+dotnet_diagnostic.RCS1194.severity = none
+
+# CA1848: 使用 LoggerMessage 委托
+dotnet_diagnostic.CA1848.severity = none
+
+# CA2254: 模板应为静态表达式
+dotnet_diagnostic.CA2254.severity = none
+
 [*.{cs,vb}]
 dotnet_style_qualification_for_field = false:silent
 dotnet_style_qualification_for_property = false:silent

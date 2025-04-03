@@ -9,7 +9,7 @@ namespace Richasy.MpvKernel;
 /// <summary>
 /// Interop class for the MPV library.
 /// </summary>
-public static partial class MpvNativeKernel
+public static partial class MpvNative
 {
     /// <summary>
     /// Initializes the MPV import resolver for the application.

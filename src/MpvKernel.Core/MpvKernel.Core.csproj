@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+  	<AssemblyName>Richasy.MpvKernel.Core</AssemblyName>
+  	<RootNamespace>$(AssemblyName)</RootNamespace>
+  	<TargetFramework>net9.0</TargetFramework>
+  	<ImplicitUsings>enable</ImplicitUsings>
+  	<Nullable>enable</Nullable>
+  	<IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+  
+  <Import Project="$(RepoRoot)/src/nuget-package.props" />
+  
+  <PropertyGroup>
+  	<!-- NuGet Package Settings -->
+  	<Title>Mpv Kernel - Core</Title>
+  	<Description>Mpv core client</Description>
+  </PropertyGroup>
+  
+  <ItemGroup>
+  	<ProjectReference Include="..\MpvKernel.Interop\MpvKernel.Interop.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <PackageReference Include="RichasyKernel.Abstractions" />
+  </ItemGroup>
+  
+</Project>

@@ -6,7 +6,7 @@ using static Richasy.MpvKernel.Constants;
 
 namespace Richasy.MpvKernel;
 
-public static partial class MpvNativeKernel
+public static partial class MpvNative
 {
     /// <summary>
     /// Create a new mpv instance and an associated client API handle to control

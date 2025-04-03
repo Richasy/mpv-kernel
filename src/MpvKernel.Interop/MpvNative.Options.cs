@@ -6,7 +6,7 @@ using static Richasy.MpvKernel.Constants;
 
 namespace Richasy.MpvKernel;
 
-public static partial class MpvNativeKernel
+public static partial class MpvNative
 {
     /// <summary>
     /// Set an option. Note that you can't normally set options during runtime. It
