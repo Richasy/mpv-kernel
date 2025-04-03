@@ -13,22 +13,37 @@ public sealed partial class MpvClient
     /// </summary>
     public event EventHandler Shutdown;
 
+    /// <summary>
+    /// 文件播放结束事件.
+    /// </summary>
+    public event EventHandler ReachFileEnd;
+
+    /// <summary>
+    /// 文件开始加载事件.
+    /// </summary>
+    public event EventHandler ReachFileLoading;
+
+    /// <summary>
+    /// 文件加载完成事件.（此时开始尝试播放，如果是网络文件，此时开始缓冲）
+    /// </summary>
+    public event EventHandler ReachFileLoaded;
+
     private void HandleEvent(MpvEvent @event)
     {
         switch (@event.EventId)
         {
             case MpvEventId.StartFile:
-                _logger.LogInformation($"[{ClientName}] Start file event received.");
+                ReachFileLoading?.Invoke(this, EventArgs.Empty);
                 break;
             case MpvEventId.EndFile:
-                _logger.LogInformation($"[{ClientName}] End file event received.");
+                ReachFileEnd?.Invoke(this, EventArgs.Empty);
                 break;
             case MpvEventId.LogMessage:
                 var logMessage = Marshal.PtrToStructure<MpvEventLogMessage>(@event.DataPtr);
                 _logger.LogInformation($"[{ClientName}] Log message: {logMessage.Level} - {logMessage.Text}");
                 break;
             case MpvEventId.FileLoaded:
-                _logger.LogInformation($"[{ClientName}] File loaded event received.");
+                ReachFileLoaded?.Invoke(this, EventArgs.Empty);
                 break;
             default:
                 _logger.LogInformation($"[{ClientName}] Event received: {@event.EventId}");

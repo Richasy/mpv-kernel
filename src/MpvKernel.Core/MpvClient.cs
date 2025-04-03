@@ -52,6 +52,20 @@ public sealed partial class MpvClient : IAsyncDisposable
     }
 
     /// <summary>
+    /// 是否开启闲置状态.
+    /// </summary>
+    /// <param name="idleEnable"><c>null</c> 对应 once, <c>true</c> 对应 yes, <c>false</c> 对应 no</param>
+    /// <returns><see cref="Task"/>.</returns>
+    public async Task UseIdleAsync(bool? idleEnable)
+    {
+        var state = idleEnable == null ? "once" : idleEnable == true ? "yes" : "no";
+        var errorCode = MpvError.Success;
+        _logger.LogInformation($"Set {ClientName} idle to {state}.");
+        await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "idle", state));
+        ThrowIfFailed(errorCode, $"{ClientName} | set idle failed");
+    }
+
+    /// <summary>
     /// 初始化（启动事件轮询）.
     /// </summary>
     public void Initialize()
