@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using Richasy.MpvKernel.Core.Enums;
+using Richasy.MpvKernel.Core.Models;
 
 namespace Richasy.MpvKernel.Core;
 
@@ -11,12 +12,28 @@ public sealed partial class MpvClient
     /// 播放指定路径的文件.
     /// </summary>
     /// <returns><see cref="Task"/>.</returns>
-    public async Task PlayAsync(string filePath)
+    public async Task PlayAsync(string filePath, MpvPlayOptions? options = null)
     {
-        List<string> args = ["loadfile", $"\"{filePath}\""];
-        MpvError errorCode = MpvError.Success;
-        await Task.Run(() => errorCode = MpvNative.SetCommandString(_handle, string.Join(' ', args)));
-        ThrowIfFailed(errorCode, $"{ClientName} | loadfile failed");
+        if (!Uri.IsWellFormedUriString(filePath, UriKind.Absolute))
+        {
+            filePath = filePath.Replace("\\", "/");
+        }
+
+        var errorCode = MpvError.Success;
+        List<string> commandArgs = ["loadfile", $"\"{filePath}\""];
+
+        if (options != null)
+        {
+            if (options.WindowHandle != null)
+            {
+                var node = new MpvNode(options.WindowHandle.Value.ToInt64());
+                await Task.Run(() => errorCode = MpvNative.SetOption(_handle, "wid", MpvFormat.Int64, ref node));
+                ThrowIfFailed(errorCode, "Mpv | set wid failed");
+            }
+        }
+
+        await Task.Run(() => errorCode = MpvNative.SetCommandString(_handle, string.Join(' ', commandArgs)));
+        ThrowIfFailed(errorCode, "Mpv | loadfile failed");
     }
 
     /// <summary>
@@ -28,7 +45,7 @@ public sealed partial class MpvClient
         var errorCode = MpvError.Success;
         var node = new MpvNode(true);
         await Task.Run(() => errorCode = MpvNative.SetProperty(_handle, "pause", MpvFormat.Flag, ref node));
-        ThrowIfFailed(errorCode, $"{ClientName} | set pause failed");
+        ThrowIfFailed(errorCode, "Mpv | set pause failed");
     }
 
     /// <summary>
@@ -40,7 +57,7 @@ public sealed partial class MpvClient
         var errorCode = MpvError.Success;
         var node = new MpvNode(false);
         await Task.Run(() => errorCode = MpvNative.SetProperty(_handle, "pause", MpvFormat.Flag, ref node));
-        ThrowIfFailed(errorCode, $"{ClientName} | set pause failed");
+        ThrowIfFailed(errorCode, "Mpv | set pause failed");
     }
 
     /// <summary>
@@ -52,7 +69,7 @@ public sealed partial class MpvClient
         var errorCode = MpvError.Success;
         var result = new MpvNode();
         await Task.Run(() => errorCode = MpvNative.GetProperty(_handle, "core-idle", MpvFormat.Flag, out result));
-        ThrowIfFailed(errorCode, $"{ClientName} | get pause failed");
+        ThrowIfFailed(errorCode, "Mpv | get pause failed");
         var isCoreIdle = result.Flag != 0;
         if (!isCoreIdle)
         {
@@ -103,7 +120,7 @@ public sealed partial class MpvClient
         var errorCode = MpvError.Success;
         var result = new MpvNode();
         await Task.Run(() => errorCode = MpvNative.GetProperty(_handle, "time-pos", MpvFormat.Double, out result));
-        ThrowIfFailed(errorCode, $"{ClientName} | get time-pos failed");
+        ThrowIfFailed(errorCode, "Mpv | get time-pos failed");
         return result.DoubleValue;
     }
 
@@ -116,7 +133,7 @@ public sealed partial class MpvClient
         var errorCode = MpvError.Success;
         var result = new MpvNode();
         await Task.Run(() => errorCode = MpvNative.GetProperty(_handle, "duration", MpvFormat.Double, out result));
-        ThrowIfFailed(errorCode, $"{ClientName} | get duration failed");
+        ThrowIfFailed(errorCode, "Mpv | get duration failed");
         return result.DoubleValue;
     }
 }

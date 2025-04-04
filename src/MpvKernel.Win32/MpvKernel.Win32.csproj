@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+  	<AssemblyName>Richasy.MpvKernel.Win32</AssemblyName>
+  	<RootNamespace>$(AssemblyName)</RootNamespace>
+  	<TargetFramework>net9.0</TargetFramework>
+  	<ImplicitUsings>enable</ImplicitUsings>
+  	<Nullable>enable</Nullable>
+  	<IsAotCompatible>true</IsAotCompatible>
+	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  
+  <Import Project="$(RepoRoot)/src/nuget-package.props" />
+  
+  <PropertyGroup>
+  	<!-- NuGet Package Settings -->
+  	<Title>Mpv Kernel - Win32</Title>
+  	<Description>Win32 player window.</Description>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Windows.CsWin32">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\MpvKernel.Core\MpvKernel.Core.csproj" />
+  </ItemGroup>
+</Project>

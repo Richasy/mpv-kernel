@@ -40,13 +40,16 @@ public sealed partial class MpvClient
                 break;
             case MpvEventId.LogMessage:
                 var logMessage = Marshal.PtrToStructure<MpvEventLogMessage>(@event.DataPtr);
-                _logger.LogInformation($"[{ClientName}] Log message: {logMessage.Level} - {logMessage.Text}");
+#if DEBUG
+                System.Diagnostics.Debug.WriteLine($"[MPV] Log message: {logMessage.Level} - {logMessage.Text}");
+#endif
+                _logger.LogInformation($"[MPV] Log message: {logMessage.Level} - {logMessage.Text}");
                 break;
             case MpvEventId.FileLoaded:
                 ReachFileLoaded?.Invoke(this, EventArgs.Empty);
                 break;
             default:
-                _logger.LogInformation($"[{ClientName}] Event received: {@event.EventId}");
+                _logger.LogInformation($"[MPV] Event received: {@event.EventId}");
                 break;
         }
     }

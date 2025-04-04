@@ -13,30 +13,43 @@ namespace Richasy.MpvKernel.Core;
 /// </summary>
 public sealed partial class MpvClient : IAsyncDisposable
 {
-    private readonly MpvInteropHandle _handle;
     private readonly ILogger _logger;
+    private readonly MpvInteropHandle _handle;
     private Task? _eventLoopTask;
     private CancellationTokenSource? _eventCts;
 
     /// <summary>
     /// Initialize a new instance of the <see cref="MpvClient"/> class.
     /// </summary>
-    internal MpvClient(string name, MpvInteropHandle handle, ILogger? logger = null)
+    internal MpvClient(MpvInteropHandle handle, ILogger? logger = null)
     {
-        ClientName = name;
         _handle = handle;
         _logger = logger ?? new NullLogger<MpvClient>();
     }
 
     /// <summary>
-    /// 客户端ID.
+    /// 是否已初始化.
     /// </summary>
-    public string ClientName { get; }
+    public bool IsInitialized { get; private set; }
 
     /// <summary>
     /// 是否已经被释放.
     /// </summary>
     public bool IsDisposed { get; private set; }
+
+    /// <summary>
+    /// 创建一个新的 MPV 实例.
+    /// </summary>
+    /// <param name="options">初始化选项.</param>
+    /// <param name="logger">日志记录.</param>
+    /// <returns><see cref="MpvClient"/>.</returns>
+    public static async Task<MpvClient> CreateAsync(MpvInitializeOptions? options = null, ILogger? logger = null)
+    {
+        var instanceHandle = MpvNative.Create();
+        var instance = new MpvClient(instanceHandle, logger);
+        await instance.InitializeAsync(options).ConfigureAwait(false);
+        return instance;
+    }
 
     /// <summary>
     /// 设置日志等级.
@@ -46,9 +59,9 @@ public sealed partial class MpvClient : IAsyncDisposable
     public async Task SetLogLevelAsync(MpvLogLevel level)
     {
         var errorCode = MpvError.Success;
-        _logger.LogInformation($"Set {ClientName} log level to {level}.");
+        _logger.LogInformation($"Set Mpv log level to {level}.");
         await Task.Run(() => errorCode = MpvNative.RequestLogMessages(_handle, level.ToMpvLogLevelString()));
-        ThrowIfFailed(errorCode, $"{ClientName} | set log level failed");
+        ThrowIfFailed(errorCode, "Mpv | set log level failed");
     }
 
     /// <summary>
@@ -60,15 +73,15 @@ public sealed partial class MpvClient : IAsyncDisposable
     {
         var state = idleEnable == null ? "once" : idleEnable == true ? "yes" : "no";
         var errorCode = MpvError.Success;
-        _logger.LogInformation($"Set {ClientName} idle to {state}.");
+        _logger.LogInformation($"Set Mpv idle to {state}.");
         await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "idle", state));
-        ThrowIfFailed(errorCode, $"{ClientName} | set idle failed");
+        ThrowIfFailed(errorCode, "Mpv | set idle failed");
     }
 
     /// <summary>
     /// 初始化（启动事件轮询）.
     /// </summary>
-    public void Initialize()
+    private void Run()
     {
         ObjectDisposedException.ThrowIf(IsDisposed, typeof(MpvClient));
 
@@ -80,7 +93,7 @@ public sealed partial class MpvClient : IAsyncDisposable
         _eventCts = new CancellationTokenSource();
         _eventLoopTask = Task.Run(() =>
         {
-            while (!_eventCts.Token.IsCancellationRequested)
+            while (_eventCts != null && !_eventCts.Token.IsCancellationRequested)
             {
                 var eventPtr = MpvNative.WaitEvent(_handle, -1);
                 var eventData = Marshal.PtrToStructure<MpvEvent>(eventPtr);
@@ -88,12 +101,83 @@ public sealed partial class MpvClient : IAsyncDisposable
 
                 if (eventData.EventId == MpvEventId.Shutdown)
                 {
-                    _logger.LogInformation($"[{ClientName}] Shutdown event received.");
+                    _logger.LogInformation("Mpv | Shutdown event received.");
                     Shutdown?.Invoke(this, EventArgs.Empty);
                     break;
                 }
             }
         }, _eventCts.Token);
+    }
+
+    /// <summary>
+    /// 初始化 MPV 实例.
+    /// </summary>
+    /// <param name="options">初始化选项.</param>
+    /// <returns><see cref="Task"/>.</returns>
+    private async Task InitializeAsync(MpvInitializeOptions? options = null)
+    {
+        if (IsInitialized)
+        {
+            return;
+        }
+
+        var errorCode = MpvError.Success;
+        await Task.Run(() =>
+        {
+            if (options != null)
+            {
+                if (options.UseConfig != null)
+                {
+                    errorCode = MpvNative.SetOptionString(_handle, "config", options.UseConfig.Value ? "yes" : "no");
+                }
+
+                ThrowIfFailed(errorCode, "Instance | set --config failed");
+
+                if (!string.IsNullOrEmpty(options.ConfigDirectory))
+                {
+                    errorCode = MpvNative.SetOptionString(_handle, "config-dir", options.ConfigDirectory);
+                }
+
+                ThrowIfFailed(errorCode, "Instance | set --config-dir failed");
+
+                if (!string.IsNullOrEmpty(options.InputConfigPath))
+                {
+                    errorCode = MpvNative.SetOptionString(_handle, "input-conf", options.InputConfigPath);
+                }
+
+                ThrowIfFailed(errorCode, "Instance | set --input-conf failed");
+
+                if (options.LoadScripts != null)
+                {
+                    errorCode = MpvNative.SetOptionString(_handle, "load-scripts", options.LoadScripts.Value ? "yes" : "no");
+                }
+
+                ThrowIfFailed(errorCode, "Instance | set --load-scripts failed");
+
+                if (!string.IsNullOrEmpty(options.ScriptPath))
+                {
+                    errorCode = MpvNative.SetOptionString(_handle, "script", options.ScriptPath);
+                }
+
+                ThrowIfFailed(errorCode, "Instance | set --script failed");
+
+                if (options.PlayerOperationMode != null)
+                {
+                    var mode = options.PlayerOperationMode switch
+                    {
+                        Enums.MpvPlayerOperationMode.PseudoGui => "pseudo-gui",
+                        _ => "cplayer",
+                    };
+                    errorCode = MpvNative.SetOptionString(_handle, "player-operation-mode", mode);
+                }
+            }
+
+            errorCode = MpvNative.Initialize(_handle);
+        });
+
+        ThrowIfFailed(errorCode, "Instance | initialize failed");
+        Run();
+        IsInitialized = true;
     }
 
     private static void ThrowIfFailed(MpvError errorCode, string message)
@@ -107,7 +191,13 @@ public sealed partial class MpvClient : IAsyncDisposable
     /// <inheritdoc/>
     public async ValueTask DisposeAsync()
     {
+        if (IsDisposed)
+        {
+            return;
+        }
+
         IsDisposed = true;
+
         if (_eventCts != null)
         {
             await _eventCts.CancelAsync();
@@ -115,6 +205,7 @@ public sealed partial class MpvClient : IAsyncDisposable
             _eventCts = null;
         }
 
+        await Task.Run(() => MpvNative.SetCommandString(_handle, "stop"));
         await Task.Run(() => MpvNative.Destroy(_handle));
     }
 }
