@@ -46,6 +46,9 @@ public sealed partial class MainWindow : Microsoft.UI.Xaml.Window
             var wnd = new MpvPlayerWindow(client);
             var filePath = file.Path;
             await wnd.InitializeAsync(filePath);
+            await client.SetVideoOutput(Richasy.MpvKernel.Core.Enums.VideoOutputType.GpuNext);
+            await client.SetGpuApiAsync(Richasy.MpvKernel.Core.Enums.GpuApiType.D3D11);
+            await client.SetGpuContextAsync(Richasy.MpvKernel.Core.Enums.GpuContextType.D3D11);
             wnd.SetSize(1280, 720);
         }
         catch (Exception)
