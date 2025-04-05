@@ -1,10 +1,12 @@
 ﻿// Copyright (c) Richasy. All rights reserved.
 // Licensed under the MIT License.
 
+using Microsoft.UI;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Richasy.MpvKernel;
 using Richasy.MpvKernel.Core;
-using Richasy.MpvKernel.Win32;
+using Richasy.MpvKernel.Core.Models;
 using System.Diagnostics;
 using Windows.Storage.Pickers;
 using WinRT.Interop;
@@ -43,13 +45,22 @@ public sealed partial class MainWindow : Microsoft.UI.Xaml.Window
             var client = await MpvClient.CreateAsync();
             await client.SetLogLevelAsync(MpvLogLevel.Info);
             await client.UseIdleAsync(true);
-            var wnd = new MpvPlayerWindow(client);
-            var filePath = file.Path;
-            await wnd.InitializeAsync(filePath);
+            var testWnd = AppWindow.Create();
+            testWnd.Destroying += async (w, _) => await client.DisposeAsync();
+            testWnd.AssociateWithDispatcherQueue(DispatcherQueue);
+            var testWndHandle = Win32Interop.GetWindowFromWindowId(testWnd.Id);
+            var options = new MpvPlayOptions
+            {
+                WindowHandle = testWndHandle,
+            };
+
+            testWnd.Show();
+            await client.PlayAsync(file.Path, options);
+            testWnd.TitleBar.ExtendsContentIntoTitleBar = true;
             await client.SetVideoOutput(Richasy.MpvKernel.Core.Enums.VideoOutputType.GpuNext);
             await client.SetGpuApiAsync(Richasy.MpvKernel.Core.Enums.GpuApiType.D3D11);
             await client.SetGpuContextAsync(Richasy.MpvKernel.Core.Enums.GpuContextType.D3D11);
-            wnd.SetSize(1280, 720);
+
         }
         catch (Exception)
         {

@@ -42,7 +42,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MpvKernel.Core\MpvKernel.Core.csproj" />
-    <ProjectReference Include="..\..\MpvKernel.Win32\MpvKernel.Win32.csproj" />
   </ItemGroup>
 
   <!--

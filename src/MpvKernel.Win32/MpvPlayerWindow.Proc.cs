@@ -20,12 +20,37 @@ public partial class MpvPlayerWindow
                 return new(0);
 
             case PInvoke.WM_DPICHANGED:
-                UpdateDpiScale();
+                Util.UpdateDpiScale(_windowHandle);
+                UpdateTitleBarRegion();
                 return new(0);
+
+            case PInvoke.WM_SIZE:
+                UpdateTitleBarRegion();
+                return new(0);
+
+            case PInvoke.WM_NCCALCSIZE:
+                // 让自定义标题栏处理非客户区计算
+                if (_customTitleBar != null && _customTitleBar.HandleMessage(uMsg, wParam, lParam, out var result))
+                {
+                    return result;
+                }
+
+                break;
+
+            case PInvoke.WM_NCHITTEST:
+                // 让自定义标题栏处理命中测试
+                if (_customTitleBar != null && _customTitleBar.HandleMessage(uMsg, wParam, lParam, out var hitTestResult))
+                {
+                    return hitTestResult;
+                }
+
+                break;
 
             default:
                 return PInvoke.DefWindowProc(hWnd, uMsg, wParam, lParam);
         }
+
+        return PInvoke.DefWindowProc(hWnd, uMsg, wParam, lParam);
     }
 
     /// <summary>

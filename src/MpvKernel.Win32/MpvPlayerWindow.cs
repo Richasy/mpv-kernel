@@ -4,6 +4,7 @@
 using Richasy.MpvKernel.Core;
 using Richasy.MpvKernel.Core.Models;
 using System.ComponentModel;
+using System.Drawing;
 using System.Runtime.InteropServices;
 using Windows.Win32;
 using Windows.Win32.Foundation;
@@ -18,29 +19,30 @@ public partial class MpvPlayerWindow : IAsyncDisposable
 {
     private const string _windowName = "MpvPlayerWindow";
 
+    private static uint _classCounter;
     private readonly MpvClient _client;
     private readonly string _className;
-    private static uint _classCounter;
+    private readonly Rectangle _initRect;
 
     private readonly WNDPROC _wndProc;
 
     private HWND _windowHandle;
-    private float _currentDpiScale = 1.0f;
+    private CustomTitleBarWindow _customTitleBar;
 
     /// <summary>
     /// Initializes a new instance of the player window with a specified client for media control.
     /// </summary>
-    /// <param name="client">The parameter provides the necessary interface for interacting with the media player.</param>
-    public MpvPlayerWindow(MpvClient client)
+    public MpvPlayerWindow(MpvClient client, Rectangle initRect)
     {
         _client = client;
+        _initRect = initRect;
         _client.Shutdown += OnClientShutdown;
         _className = $"MpvPlayerWindowClass_{++_classCounter}";
         _wndProc = WindowProc;
 
         RegisterWindowClass();
         CreateWindow();
-        UpdateDpiScale(); // 初始化DPI缩放比例
+        Util.UpdateDpiScale(_windowHandle); // 初始化DPI缩放比例
     }
 
     /// <summary>
@@ -48,13 +50,33 @@ public partial class MpvPlayerWindow : IAsyncDisposable
     /// </summary>
     public IntPtr Handle => _windowHandle;
 
+    /// <summary>
+    /// 标题栏元素.
+    /// </summary>
+    public IMpvTitleBarElement? TitleBarElement
+    {
+        get => field;
+        set
+        {
+            field = value;
+            _customTitleBar?.SetElement(TitleBarElement);
+        }
+    }
+
+    /// <summary>
+    /// 覆盖客户区的UI元素.
+    /// </summary>
+    public IMpvUIElement? ClientElement { get; set; }
+
     /// <inheritdoc/>
     public async ValueTask DisposeAsync()
     {
         if (_windowHandle != IntPtr.Zero)
         {
             PInvoke.RemoveWindowSubclass(_windowHandle, DpiChangedSubclassProc, 0);
+            _customTitleBar?.Dispose();
             PInvoke.DestroyWindow(_windowHandle);
+            TitleBarElement?.Dispose();
             _windowHandle = default;
         }
 
@@ -82,6 +104,7 @@ public partial class MpvPlayerWindow : IAsyncDisposable
         };
 
         await _client.PlayAsync(filePath, options);
+        PInvoke.SetWindowPos(_windowHandle, default, _initRect.X, _initRect.Y, Util.Pt2Pix(_initRect.Width), Util.Pt2Pix(_initRect.Height), SET_WINDOW_POS_FLAGS.SWP_NOMOVE | SET_WINDOW_POS_FLAGS.SWP_NOZORDER);
         Activate();
     }
 
@@ -145,8 +168,6 @@ public partial class MpvPlayerWindow : IAsyncDisposable
 
     private void CreateWindow()
     {
-        var width = ScaleToDpi(800);
-        var height = ScaleToDpi(600);
         unsafe
         {
             _windowHandle = PInvoke.CreateWindowEx(
@@ -154,10 +175,10 @@ public partial class MpvPlayerWindow : IAsyncDisposable
                 _className,
                 _windowName,
                 WINDOW_STYLE.WS_OVERLAPPEDWINDOW,
-                0,
-                0,
-                width,
-                height,
+                _initRect.X,
+                _initRect.Y,
+                Util.Pt2Pix(_initRect.Width),
+                Util.Pt2Pix(_initRect.Height),
                 default,
                 default,
                 default,
@@ -171,5 +192,20 @@ public partial class MpvPlayerWindow : IAsyncDisposable
 
         // 监听DPI变化
         PInvoke.SetWindowSubclass(_windowHandle, DpiChangedSubclassProc, 0, 0);
+        _customTitleBar = new CustomTitleBarWindow(_windowHandle);
+        UpdateTitleBarRegion();
+    }
+
+    private void UpdateTitleBarRegion()
+    {
+        PInvoke.GetClientRect(_windowHandle, out var clientRect);
+        var dragRegion = new RECT
+        {
+            left = 0,
+            top = 0,
+            right = clientRect.right - clientRect.left,
+            bottom = Util.Pt2Pix(32) // 32像素高的标题栏区域
+        };
+        _customTitleBar.SetDragRegion(dragRegion);
     }
 }

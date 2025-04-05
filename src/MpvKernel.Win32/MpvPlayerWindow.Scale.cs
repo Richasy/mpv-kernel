@@ -21,8 +21,8 @@ public partial class MpvPlayerWindow
                 _windowHandle,
                 default,
                 0, 0,
-                ScaleToDpi(width),
-                ScaleToDpi(height),
+                Util.Pt2Pix(width),
+                Util.Pt2Pix(height),
                 SET_WINDOW_POS_FLAGS.SWP_NOMOVE | SET_WINDOW_POS_FLAGS.SWP_NOZORDER
             );
         }
@@ -37,21 +37,14 @@ public partial class MpvPlayerWindow
             return (0, 0);
 
         PInvoke.GetClientRect(_windowHandle, out var rect);
-        return (ScaleFromDpi(rect.right - rect.left), ScaleFromDpi(rect.bottom - rect.top));
-    }
-
-    private void UpdateDpiScale()
-    {
-        // 获取当前窗口DPI
-        var dpi = Windows.Win32.PInvoke.GetDpiForWindow(_windowHandle);
-        _currentDpiScale = dpi / 96.0f; // 96是100%缩放的标准DPI
+        return (Util.Pix2Pt(rect.right - rect.left), Util.Pix2Pt(rect.bottom - rect.top));
     }
 
     private LRESULT DpiChangedSubclassProc(HWND hWnd, uint uMsg, WPARAM wParam, LPARAM lParam, nuint uIdSubclass, nuint dwRefData)
     {
         if (uMsg == PInvoke.WM_DPICHANGED)
         {
-            UpdateDpiScale();
+            Util.UpdateDpiScale(_windowHandle);
 
             // 建议的新窗口大小和位置
             var rect = Marshal.PtrToStructure<RECT>((IntPtr)lParam);
@@ -70,14 +63,4 @@ public partial class MpvPlayerWindow
 
         return PInvoke.DefSubclassProc(hWnd, uMsg, wParam, lParam);
     }
-
-    /// <summary>
-    /// 将逻辑像素转换为物理像素（考虑DPI缩放）
-    /// </summary>
-    private int ScaleToDpi(int value) => (int)(value * _currentDpiScale);
-
-    /// <summary>
-    /// 将物理像素转换为逻辑像素（考虑DPI缩放）
-    /// </summary>
-    private int ScaleFromDpi(int value) => (int)(value / _currentDpiScale);
 }
