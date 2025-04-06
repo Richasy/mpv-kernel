@@ -3,6 +3,7 @@
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Richasy.MpvKernel.Core.Enums;
 using Richasy.MpvKernel.Core.Models;
 using System.Runtime.InteropServices;
 
@@ -17,6 +18,7 @@ public sealed partial class MpvClient : IAsyncDisposable
     private readonly MpvInteropHandle _handle;
     private Task? _eventLoopTask;
     private CancellationTokenSource? _eventCts;
+    private double? _cachedDuration;
 
     /// <summary>
     /// Initialize a new instance of the <see cref="MpvClient"/> class.
@@ -26,6 +28,11 @@ public sealed partial class MpvClient : IAsyncDisposable
         _handle = handle;
         _logger = logger ?? new NullLogger<MpvClient>();
     }
+
+    /// <summary>
+    /// 数据通知事件.
+    /// </summary>
+    public event EventHandler<MpvClientNotifyEventArgs> DataNotify;
 
     /// <summary>
     /// 是否已初始化.
@@ -48,6 +55,10 @@ public sealed partial class MpvClient : IAsyncDisposable
         var instanceHandle = MpvNative.Create();
         var instance = new MpvClient(instanceHandle, logger);
         await instance.InitializeAsync(options).ConfigureAwait(false);
+        MpvNative.ObserveProperty(instanceHandle, 0, "duration", MpvFormat.Double);
+        MpvNative.ObserveProperty(instanceHandle, 0, "time-pos", MpvFormat.Double);
+        MpvNative.ObserveProperty(instanceHandle, 0, "volume", MpvFormat.Double);
+        MpvNative.ObserveProperty(instanceHandle, 0, "pause", MpvFormat.Flag);
         return instance;
     }
 
@@ -208,4 +219,6 @@ public sealed partial class MpvClient : IAsyncDisposable
         await Task.Run(() => MpvNative.SetCommandString(_handle, "stop"));
         await Task.Run(() => MpvNative.Destroy(_handle));
     }
+
+    private void SendNotify(MpvClientEventId id, object? data) => DataNotify?.Invoke(this, new(id, data));
 }

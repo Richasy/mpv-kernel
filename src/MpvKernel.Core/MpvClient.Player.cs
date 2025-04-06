@@ -19,6 +19,7 @@ public sealed partial class MpvClient
             filePath = filePath.Replace("\\", "/");
         }
 
+        _cachedDuration = default;
         var errorCode = MpvError.Success;
         List<string> commandArgs = ["loadfile", $"\"{filePath}\""];
 
@@ -125,15 +126,62 @@ public sealed partial class MpvClient
     }
 
     /// <summary>
+    /// 设置当前播放位置.
+    /// </summary>
+    /// <returns><see cref="Task"/>.</returns>
+    public async Task SetCurrentPositionAsync(double position)
+    {
+        var errorCode = MpvError.Success;
+        var node = new MpvNode(position);
+        await Task.Run(() => errorCode = MpvNative.SetProperty(_handle, "time-pos", MpvFormat.Double, ref node));
+        ThrowIfFailed(errorCode, "Mpv | set time-pos failed");
+    }
+
+    /// <summary>
     /// 获取当前播放文件的时长.
     /// </summary>
     /// <returns>时长（秒）</returns>
     public async Task<double> GetDurationAsync()
     {
+        if (_cachedDuration == null)
+        {
+            var errorCode = MpvError.Success;
+            var result = new MpvNode();
+            await Task.Run(() => errorCode = MpvNative.GetProperty(_handle, "duration", MpvFormat.Double, out result));
+            ThrowIfFailed(errorCode, "Mpv | get duration failed");
+            _cachedDuration = result.DoubleValue;
+        }
+
+        return _cachedDuration.Value;
+    }
+
+    /// <summary>
+    /// 获取当前播放文件的音量.
+    /// </summary>
+    /// <returns></returns>
+    public async Task<double> GetVolumeAsync()
+    {
         var errorCode = MpvError.Success;
         var result = new MpvNode();
-        await Task.Run(() => errorCode = MpvNative.GetProperty(_handle, "duration", MpvFormat.Double, out result));
-        ThrowIfFailed(errorCode, "Mpv | get duration failed");
+        await Task.Run(() => errorCode = MpvNative.GetProperty(_handle, "volume", MpvFormat.Double, out result));
+        ThrowIfFailed(errorCode, "Mpv | get volume failed");
         return result.DoubleValue;
+    }
+
+    /// <summary>
+    /// 设置音量.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when the volume value is less than 0 or greater than 100.</exception>
+    public async Task SetVolumeAsync(double volume)
+    {
+        if (volume < 0 || volume > 100)
+        {
+            throw new ArgumentOutOfRangeException(nameof(volume), "Volume must be between 0 and 100.");
+        }
+
+        var errorCode = MpvError.Success;
+        var node = new MpvNode(volume);
+        await Task.Run(() => errorCode = MpvNative.SetProperty(_handle, "volume", MpvFormat.Double, ref node));
+        ThrowIfFailed(errorCode, "Mpv | set volume failed");
     }
 }

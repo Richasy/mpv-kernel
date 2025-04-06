@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using Microsoft.Extensions.Logging;
+using Richasy.MpvKernel.Core.Enums;
 using System.Runtime.InteropServices;
 
 namespace Richasy.MpvKernel.Core;
@@ -48,9 +49,48 @@ public sealed partial class MpvClient
             case MpvEventId.FileLoaded:
                 ReachFileLoaded?.Invoke(this, EventArgs.Empty);
                 break;
+            case MpvEventId.Idle:
+                SendNotify(Enums.MpvClientEventId.StateChanged, MpvPlayerState.Idle);
+                break;
+            case MpvEventId.Seek:
+                SendNotify(Enums.MpvClientEventId.StateChanged, MpvPlayerState.Seeking);
+                break;
+            case MpvEventId.PropertyChange:
+                var eventProp = Marshal.PtrToStructure<MpvEventProperty>(@event.DataPtr);
+                HandleObservePropertyChanged(eventProp);
+                break;
             default:
                 _logger.LogInformation($"[MPV] Event received: {@event.EventId}");
                 break;
+        }
+    }
+
+    private async void HandleObservePropertyChanged(MpvEventProperty eventProp)
+    {
+        if (eventProp.DataPtr == IntPtr.Zero)
+        {
+            return;
+        }
+
+        if (eventProp.Name == "pause")
+        {
+            var state = await GetPlayerStateAsync();
+            SendNotify(MpvClientEventId.StateChanged, state);
+        }
+        else if (eventProp.Name == "volume")
+        {
+            var volume = Marshal.PtrToStructure<double>(eventProp.DataPtr);
+            SendNotify(MpvClientEventId.VolumeChanged, volume);
+        }
+        else if (eventProp.Name == "duration")
+        {
+            var duration = Marshal.PtrToStructure<double>(eventProp.DataPtr);
+            SendNotify(MpvClientEventId.DurationChanged, duration);
+        }
+        else if (eventProp.Name == "time-pos")
+        {
+            var position = Marshal.PtrToStructure<double>(eventProp.DataPtr);
+            SendNotify(MpvClientEventId.PositionChanged, position);
         }
     }
 }

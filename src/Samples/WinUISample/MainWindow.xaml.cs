@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 using Microsoft.UI;
-using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
+using MpvKernel.WinUI;
 using Richasy.MpvKernel;
 using Richasy.MpvKernel.Core;
 using Richasy.MpvKernel.Core.Models;
@@ -43,20 +43,20 @@ public sealed partial class MainWindow : Microsoft.UI.Xaml.Window
             }
 
             var client = await MpvClient.CreateAsync();
+            client.DataNotify += (_, args) => System.Diagnostics.Debug.WriteLine($"{args.Id}: {args.Data}");
             await client.SetLogLevelAsync(MpvLogLevel.Info);
             await client.UseIdleAsync(true);
-            var testWnd = AppWindow.Create();
-            testWnd.Destroying += async (w, _) => await client.DisposeAsync();
-            testWnd.AssociateWithDispatcherQueue(DispatcherQueue);
-            var testWndHandle = Win32Interop.GetWindowFromWindowId(testWnd.Id);
+            var playerWindow = new MpvPlayerWindow(client, DispatcherQueue);
+            playerWindow.GetWindow().Title = file.Name;
+            playerWindow.GetWindow().TitleBar.ExtendsContentIntoTitleBar = true;
+            playerWindow.GetWindow().TitleBar.ButtonBackgroundColor = Colors.Transparent;
+            playerWindow.GetWindow().TitleBar.PreferredTheme = Microsoft.UI.Windowing.TitleBarTheme.UseDefaultAppMode;
+            playerWindow.Show();
             var options = new MpvPlayOptions
             {
-                WindowHandle = testWndHandle,
+                WindowHandle = playerWindow.Handle,
             };
-
-            testWnd.Show();
             await client.PlayAsync(file.Path, options);
-            testWnd.TitleBar.ExtendsContentIntoTitleBar = true;
             await client.SetVideoOutput(Richasy.MpvKernel.Core.Enums.VideoOutputType.GpuNext);
             await client.SetGpuApiAsync(Richasy.MpvKernel.Core.Enums.GpuApiType.D3D11);
             await client.SetGpuContextAsync(Richasy.MpvKernel.Core.Enums.GpuContextType.D3D11);

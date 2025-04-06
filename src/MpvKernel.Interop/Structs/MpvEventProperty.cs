@@ -17,7 +17,7 @@ public struct MpvEventProperty
     /// Format.
     /// </summary>
     public MpvFormat Format;
-    
+
     /// <summary>
     /// Data.
     /// </summary>
