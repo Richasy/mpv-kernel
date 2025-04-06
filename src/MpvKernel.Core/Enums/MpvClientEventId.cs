@@ -27,4 +27,14 @@ public enum MpvClientEventId
     /// 播放位置发生变化.
     /// </summary>
     PositionChanged,
+
+    /// <summary>
+    /// 全屏状态发生变化.
+    /// </summary>
+    FullScreenChanged,
+
+    /// <summary>
+    /// 小窗状态发生变化.
+    /// </summary>
+    CompactOverlayChanged,
 }

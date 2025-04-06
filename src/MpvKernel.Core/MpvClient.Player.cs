@@ -20,6 +20,7 @@ public sealed partial class MpvClient
         }
 
         _cachedDuration = default;
+        _cachedSnapshot = MpvPlayerSnapshot.Create(filePath, options);
         var errorCode = MpvError.Success;
         List<string> commandArgs = ["loadfile", $"\"{filePath}\""];
 
@@ -59,6 +60,28 @@ public sealed partial class MpvClient
         var node = new MpvNode(false);
         await Task.Run(() => errorCode = MpvNative.SetProperty(_handle, "pause", MpvFormat.Flag, ref node));
         ThrowIfFailed(errorCode, "Mpv | set pause failed");
+    }
+
+    /// <summary>
+    /// 重新播放当前文件.
+    /// </summary>
+    /// <returns><see cref="Task"/>.</returns>
+    public async Task ReplayAsync()
+    {
+        if (_cachedSnapshot == null)
+        {
+            throw new InvalidOperationException("Replay failed, please play a file first.");
+        }
+
+        if (_cachedSnapshot.Type == MpvFileType.LocalFile)
+        {
+            if (_cachedSnapshot.Options?.StartPosition != null)
+            {
+                _cachedSnapshot.Options.StartPosition = null;
+            }
+
+            await PlayAsync(_cachedSnapshot.FilePath!, _cachedSnapshot.Options);
+        }
     }
 
     /// <summary>

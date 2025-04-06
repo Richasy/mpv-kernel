@@ -47,6 +47,30 @@ public sealed partial class MainWindow : Microsoft.UI.Xaml.Window
             await client.SetLogLevelAsync(MpvLogLevel.Info);
             await client.UseIdleAsync(true);
             var playerWindow = new MpvPlayerWindow(client, DispatcherQueue);
+            var overlay = new PlayerOverlay(client,
+                isFullScreen =>
+                {
+                    if (isFullScreen)
+                    {
+                        playerWindow.GetWindow().SetPresenter(Microsoft.UI.Windowing.AppWindowPresenterKind.FullScreen);
+                    }
+                    else
+                    {
+                        playerWindow.GetWindow().SetPresenter(Microsoft.UI.Windowing.AppWindowPresenterKind.Default);
+                    }
+                },
+                isCompactOverlay =>
+                {
+                    if (isCompactOverlay)
+                    {
+                        playerWindow.GetWindow().SetPresenter(Microsoft.UI.Windowing.AppWindowPresenterKind.CompactOverlay);
+                    }
+                    else
+                    {
+                        playerWindow.GetWindow().SetPresenter(Microsoft.UI.Windowing.AppWindowPresenterKind.Default);
+                    }
+                });
+            playerWindow.SetUIElement(overlay);
             playerWindow.GetWindow().Title = file.Name;
             playerWindow.GetWindow().TitleBar.ExtendsContentIntoTitleBar = true;
             playerWindow.GetWindow().TitleBar.ButtonBackgroundColor = Colors.Transparent;

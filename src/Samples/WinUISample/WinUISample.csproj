@@ -12,6 +12,9 @@
     <EnableMsixTooling>true</EnableMsixTooling>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+  <ItemGroup>
+    <None Remove="PlayerOverlay.xaml" />
+  </ItemGroup>
 
   <ItemGroup>
     <Content Include="Assets\SplashScreen.scale-200.png" />
@@ -38,10 +41,16 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" />
     <PackageReference Include="Microsoft.WindowsAppSDK" />
+    <PackageReference Include="Richasy.WinUIKernel.Share" />
     <PackageReference Include="Win32.NativeWindow" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MpvKernel.WinUI\MpvKernel.WinUI.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="PlayerOverlay.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
 
   <!--

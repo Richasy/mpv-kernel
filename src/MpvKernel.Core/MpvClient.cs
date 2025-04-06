@@ -19,6 +19,7 @@ public sealed partial class MpvClient : IAsyncDisposable
     private Task? _eventLoopTask;
     private CancellationTokenSource? _eventCts;
     private double? _cachedDuration;
+    private MpvPlayerSnapshot? _cachedSnapshot;
 
     /// <summary>
     /// Initialize a new instance of the <see cref="MpvClient"/> class.
@@ -59,6 +60,9 @@ public sealed partial class MpvClient : IAsyncDisposable
         MpvNative.ObserveProperty(instanceHandle, 0, "time-pos", MpvFormat.Double);
         MpvNative.ObserveProperty(instanceHandle, 0, "volume", MpvFormat.Double);
         MpvNative.ObserveProperty(instanceHandle, 0, "pause", MpvFormat.Flag);
+        MpvNative.ObserveProperty(instanceHandle, 0, "core-idle", MpvFormat.Flag);
+        MpvNative.ObserveProperty(instanceHandle, 0, "fullscreen", MpvFormat.Flag);
+        MpvNative.ObserveProperty(instanceHandle, 0, "ontop", MpvFormat.Flag);
         return instance;
     }
 

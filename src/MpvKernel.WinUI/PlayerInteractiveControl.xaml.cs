@@ -67,7 +67,12 @@ public sealed partial class PlayerInteractiveControl : UserControl
         }
 
         CapturePointer(e.Pointer);
-        _gestureRecognizer.ProcessDownEvent(e.GetCurrentPoint(this));
+        var p = e.GetCurrentPoint(this);
+        if (p != null)
+        {
+            _gestureRecognizer.ProcessDownEvent(e.GetCurrentPoint(this));
+        }
+
         e.Handled = true;
     }
 
@@ -89,7 +94,7 @@ public sealed partial class PlayerInteractiveControl : UserControl
     protected override void OnPointerReleased(PointerRoutedEventArgs e)
     {
         base.OnPointerReleased(e);
-        if (!PointerCaptures.Any(p => p.PointerId == e.Pointer.PointerId))
+        if (PointerCaptures?.Any(p => p.PointerId == e.Pointer.PointerId) != true || e.GetIntermediatePoints(this) is null)
         {
             return;
         }
@@ -156,6 +161,7 @@ public sealed partial class PlayerInteractiveControl : UserControl
                     // 中间区域调整播放进度.
                     if (Math.Abs(deltaX) > 2 && Math.Abs(deltaX) > Math.Abs(deltaY))
                     {
+                        await _client.PauseAsync();
                         var newPos = await GetNewPositionAsync();
                         if (newPos != null)
                         {
@@ -199,6 +205,7 @@ public sealed partial class PlayerInteractiveControl : UserControl
             if (newPos.HasValue)
             {
                 await _client.SetCurrentPositionAsync(newPos.Value);
+                await _client.ResumeAsync();
             }
         }
 

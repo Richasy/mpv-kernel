@@ -37,7 +37,7 @@ public sealed class MpvPlayerWindow : IAsyncDisposable
         _topWindow.Changed += OnWindowChanged;
 
         _rootGrid = new Grid();
-        _rootGrid.Children.Add(new PlayerInteractiveControl(client, (id, data) => DataNotify?.Invoke(this, new(id, data))));
+        _rootGrid.Children.Add(new PlayerInteractiveControl(client, HandleInteractiveNotify));
 
         _xamlSource = new DesktopWindowXamlSource();
         _xamlSource.Initialize(_topWindow.Id);
@@ -45,11 +45,6 @@ public sealed class MpvPlayerWindow : IAsyncDisposable
 
         Handle = Win32Interop.GetWindowFromWindowId(_topWindow.Id);
     }
-
-    /// <summary>
-    /// 数据通知.
-    /// </summary>
-    public event EventHandler<MpvUINotifyEventArgs> DataNotify;
 
     /// <summary>
     /// 对象是否已经被释放.
@@ -74,6 +69,8 @@ public sealed class MpvPlayerWindow : IAsyncDisposable
     {
         if (_rootGrid.Children.Count > 1)
         {
+            var oldElement = _rootGrid.Children[1] as IMpvUIElement;
+            oldElement?.Disconnect();
             _rootGrid.Children.RemoveAt(1);
         }
 
@@ -101,6 +98,12 @@ public sealed class MpvPlayerWindow : IAsyncDisposable
         IsDisposed = true;
         if (_topWindow != null)
         {
+            if (_rootGrid?.Children.Count > 1)
+            {
+                var oldElement = _rootGrid.Children[1] as IMpvUIElement;
+                oldElement?.Disconnect();
+            }
+
             _topWindow.Destroying -= OnWindowDestroying;
             _topWindow.Changed -= OnWindowChanged;
             _topWindow.Destroy();
@@ -126,6 +129,15 @@ public sealed class MpvPlayerWindow : IAsyncDisposable
             0,
             0,
             _topWindow.ClientSize.Width,
-            _topWindow.ClientSize.Height + _topWindow.TitleBar.Height));
+            _topWindow.ClientSize.Height));
+    }
+
+    private void HandleInteractiveNotify(MpvUIEventId id, object data)
+    {
+        if (_rootGrid?.Children.Count > 1)
+        {
+            var element = _rootGrid.Children[1] as IMpvUIElement;
+            element?.HandleUINotify(id, data);
+        }
     }
 }

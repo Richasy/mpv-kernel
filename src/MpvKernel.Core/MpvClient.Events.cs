@@ -29,7 +29,7 @@ public sealed partial class MpvClient
     /// </summary>
     public event EventHandler ReachFileLoaded;
 
-    private void HandleEvent(MpvEvent @event)
+    private async void HandleEvent(MpvEvent @event)
     {
         switch (@event.EventId)
         {
@@ -50,10 +50,11 @@ public sealed partial class MpvClient
                 ReachFileLoaded?.Invoke(this, EventArgs.Empty);
                 break;
             case MpvEventId.Idle:
-                SendNotify(Enums.MpvClientEventId.StateChanged, MpvPlayerState.Idle);
-                break;
             case MpvEventId.Seek:
-                SendNotify(Enums.MpvClientEventId.StateChanged, MpvPlayerState.Seeking);
+                {
+                    var state = await GetPlayerStateAsync();
+                    SendNotify(MpvClientEventId.StateChanged, state);
+                }
                 break;
             case MpvEventId.PropertyChange:
                 var eventProp = Marshal.PtrToStructure<MpvEventProperty>(@event.DataPtr);
@@ -72,7 +73,7 @@ public sealed partial class MpvClient
             return;
         }
 
-        if (eventProp.Name == "pause")
+        if (eventProp.Name == "pause" || eventProp.Name == "core-idle")
         {
             var state = await GetPlayerStateAsync();
             SendNotify(MpvClientEventId.StateChanged, state);
@@ -91,6 +92,16 @@ public sealed partial class MpvClient
         {
             var position = Marshal.PtrToStructure<double>(eventProp.DataPtr);
             SendNotify(MpvClientEventId.PositionChanged, position);
+        }
+        else if (eventProp.Name == "fullscreen")
+        {
+            var isFullScreen = Marshal.PtrToStructure<MpvNode>(eventProp.DataPtr);
+            SendNotify(MpvClientEventId.FullScreenChanged, isFullScreen.Flag != 0);
+        }
+        else if (eventProp.Name == "ontop")
+        {
+            var isOnTop = Marshal.PtrToStructure<MpvNode>(eventProp.DataPtr);
+            SendNotify(MpvClientEventId.CompactOverlayChanged, isOnTop.Flag != 0);
         }
     }
 }

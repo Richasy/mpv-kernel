@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<base:LayoutUserControlBase
+    x:Class="WinUISample.PlayerOverlay"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:base="using:Richasy.WinUIKernel.Share.Base"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:ic="using:FluentIcons.WinUI"
+    xmlns:local="using:WinUISample"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <Style x:Key="IconButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="36" />
+            <Setter Property="Height" Value="36" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="CornerRadius" Value="20" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Rectangle
+            x:Name="OverlayRect"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            Fill="Black"
+            Visibility="Collapsed" />
+        <base:LoadingWidget
+            x:Name="FileLoadingWidget"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Text="Loading..."
+            Visibility="Collapsed" />
+        <Button
+            x:Name="ReplayButton"
+            MinWidth="120"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Click="OnReplayButtonClick"
+            Content="Restart"
+            Visibility="Collapsed" />
+        <StackPanel
+            x:Name="PlayerControlPanel"
+            MinWidth="400"
+            Margin="20"
+            Padding="12,8"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Bottom"
+            Background="{ThemeResource AcrylicInAppFillColorDefaultBrush}"
+            CornerRadius="{StaticResource ControlCornerRadius}"
+            Spacing="8"
+            Visibility="Collapsed">
+            <Grid ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock
+                    x:Name="PositionBlock"
+                    VerticalAlignment="Center"
+                    Style="{StaticResource CaptionTextBlockStyle}" />
+                <Slider
+                    x:Name="ProgressSlider"
+                    Grid.Column="1"
+                    HorizontalAlignment="Stretch"
+                    ValueChanged="OnProgressValueChanged" />
+                <Slider
+                    x:Name="ProgressSliderFake"
+                    Grid.Column="1"
+                    HorizontalAlignment="Stretch"
+                    Visibility="Collapsed" />
+                <TextBlock
+                    x:Name="DurationBlock"
+                    Grid.Column="2"
+                    VerticalAlignment="Center"
+                    Style="{StaticResource CaptionTextBlockStyle}" />
+            </Grid>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Button
+                        x:Name="Backward10sButton"
+                        Click="OnBackwardButtonClick"
+                        Style="{StaticResource IconButtonStyle}">
+                        <ic:SymbolIcon FontSize="14" Symbol="SkipBack10" />
+                    </Button>
+                    <Button
+                        x:Name="PlayPauseButton"
+                        Width="48"
+                        Height="48"
+                        Click="OnPlayPauseButtonClick"
+                        CornerRadius="24"
+                        Style="{StaticResource IconButtonStyle}">
+                        <Grid>
+                            <ic:SymbolIcon
+                                x:Name="PlayPauseIcon"
+                                FontSize="18"
+                                Foreground="{ThemeResource AccentFillColorDefaultBrush}"
+                                IconVariant="Filled" />
+                            <ProgressRing
+                                x:Name="PlayPauseRing"
+                                Width="40"
+                                Height="40"
+                                MinWidth="0"
+                                MinHeight="0"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center" />
+                        </Grid>
+                    </Button>
+                    <Button
+                        x:Name="Forward30sButton"
+                        Click="OnForwardButtonClick"
+                        Style="{StaticResource IconButtonStyle}">
+                        <ic:SymbolIcon FontSize="14" Symbol="SkipForward30" />
+                    </Button>
+                </StackPanel>
+                <StackPanel
+                    Grid.Column="2"
+                    HorizontalAlignment="Right"
+                    Orientation="Horizontal">
+                    <Button x:Name="VolumeButton" Style="{StaticResource IconButtonStyle}">
+                        <ic:SymbolIcon FontSize="14" Symbol="Speaker2" />
+                        <Button.Flyout>
+                            <Flyout Placement="Top">
+                                <Slider
+                                    x:Name="VolumeSlider"
+                                    Width="200"
+                                    Header="Volume"
+                                    LargeChange="10"
+                                    Maximum="100"
+                                    Minimum="0"
+                                    SmallChange="1"
+                                    StepFrequency="1"
+                                    ValueChanged="OnVolumeValueChanged" />
+                            </Flyout>
+                        </Button.Flyout>
+                    </Button>
+                    <Button
+                        x:Name="FullScreenButton"
+                        Click="OnFullScreenButtonClick"
+                        Style="{StaticResource IconButtonStyle}">
+                        <ic:SymbolIcon
+                            x:Name="FullScreenIcon"
+                            FontSize="14"
+                            Symbol="FullScreenMaximize" />
+                    </Button>
+                    <Button
+                        x:Name="CompactOverlayButton"
+                        Click="OnCompactOverlayButtonClick"
+                        Style="{StaticResource IconButtonStyle}">
+                        <ic:SymbolIcon
+                            x:Name="CompactOverlayIcon"
+                            FontSize="14"
+                            Symbol="ContractUpRight" />
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+        <ProgressBar
+            x:Name="PlayProgress"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Bottom"
+            Background="Transparent" />
+    </Grid>
+</base:LayoutUserControlBase>
