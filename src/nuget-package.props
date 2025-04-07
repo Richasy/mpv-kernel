@@ -1,7 +1,7 @@
 <Project>
   <PropertyGroup>
     <!-- Central version prefix - applies to all nuget packages. -->
-    <PackageVersion>0.0.7-preview5</PackageVersion>
+    <PackageVersion>0.0.1-preview1</PackageVersion>
     <Configurations>Debug;Release</Configurations>
     <IsPackable>true</IsPackable>
 
@@ -11,8 +11,8 @@
     <!-- Default description and tags. Packages can override. -->
     <Authors>Richasy</Authors>
     <Company>Richasy</Company>
-    <Product>WinUI Kernel</Product>
-    <Description>个人 WinUI 项目共享代码.</Description>
+    <Product>Mpv Kernel</Product>
+    <Description>MPV 交互核心.</Description>
     <PackageTags>Richasy</PackageTags>
     <PackageId>$(AssemblyName)</PackageId>
     <PackageIcon>icon.png</PackageIcon>
@@ -22,8 +22,8 @@
     <!-- Required license, copyright, and repo information. Packages can override. -->
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Copyright>© Richasy. All rights reserved.</Copyright>
-    <PackageProjectUrl>https://github.com/Richasy/winui-kernel</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/Richasy/winui-kernel</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/Richasy/mpv-kernel</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Richasy/mpv-kernel</RepositoryUrl>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
 
     <!-- Build symbol package (.snupkg) to distribute the PDB containing Source Link -->
