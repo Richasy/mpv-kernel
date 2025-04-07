@@ -47,7 +47,15 @@ public sealed partial class MpvClient
                 _logger.LogInformation($"[MPV] Log message: {logMessage.Level} - {logMessage.Text}");
                 break;
             case MpvEventId.FileLoaded:
+                // 检查如果有额外的音频需要加载，那就在此时加载.
                 ReachFileLoaded?.Invoke(this, EventArgs.Empty);
+                if (!string.IsNullOrEmpty(_cachedSnapshot?.Options?.ExtraAudioUrl))
+                {
+                    var errorCode = MpvError.Success;
+                    await Task.Run(() => errorCode = MpvNative.SetCommandString(_handle, $"audio-add \"{_cachedSnapshot.Options.ExtraAudioUrl}\""));
+                    ThrowIfFailed(errorCode, "Mpv | load extra audio failed");
+                }
+
                 break;
             case MpvEventId.Idle:
             case MpvEventId.Seek:

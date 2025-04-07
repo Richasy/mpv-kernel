@@ -12,7 +12,7 @@ namespace Richasy.MpvKernel.WinUI;
 /// <summary>
 /// 播放器交互面板.
 /// </summary>
-public sealed partial class PlayerInteractiveControl : UserControl
+public sealed partial class PlayerInteractivePanel : Control
 {
     private readonly MpvClient _client;
     private readonly Action<MpvUIEventId, object>? _notifyAction;
@@ -25,11 +25,11 @@ public sealed partial class PlayerInteractiveControl : UserControl
     private bool _isManipulating;
 
     /// <summary>
-    /// 初始化一个新的 <see cref="PlayerInteractiveControl"/> 实例.
+    /// 初始化一个新的 <see cref="PlayerInteractivePanel"/> 实例.
     /// </summary>
-    public PlayerInteractiveControl(MpvClient client, Action<MpvUIEventId, object>? notifyAction = null)
+    public PlayerInteractivePanel(MpvClient client, Action<MpvUIEventId, object>? notifyAction = null)
     {
-        InitializeComponent();
+        DefaultStyleKey = typeof(PlayerInteractivePanel);
         _notifyAction = notifyAction;
         _client = client;
 

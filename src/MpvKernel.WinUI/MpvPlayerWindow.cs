@@ -37,7 +37,7 @@ public sealed class MpvPlayerWindow : IAsyncDisposable
         _topWindow.Changed += OnWindowChanged;
 
         _rootGrid = new Grid();
-        _rootGrid.Children.Add(new PlayerInteractiveControl(client, HandleInteractiveNotify));
+        _rootGrid.Children.Add(new PlayerInteractivePanel(client, HandleInteractiveNotify));
 
         _xamlSource = new DesktopWindowXamlSource();
         _xamlSource.Initialize(_topWindow.Id);
@@ -45,6 +45,11 @@ public sealed class MpvPlayerWindow : IAsyncDisposable
 
         Handle = Win32Interop.GetWindowFromWindowId(_topWindow.Id);
     }
+
+    /// <summary>
+    /// UI 通知.
+    /// </summary>
+    public event EventHandler<MpvUINotifyEventArgs> UINotify;
 
     /// <summary>
     /// 对象是否已经被释放.
@@ -134,6 +139,7 @@ public sealed class MpvPlayerWindow : IAsyncDisposable
 
     private void HandleInteractiveNotify(MpvUIEventId id, object data)
     {
+        UINotify?.Invoke(this, new(id, data));
         if (_rootGrid?.Children.Count > 1)
         {
             var element = _rootGrid.Children[1] as IMpvUIElement;

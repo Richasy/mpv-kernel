@@ -73,11 +73,6 @@ public sealed partial class MpvClient
             {
                 commandOptions.Add($"speed={Math.Round(options.InitialSpeed.Value)}");
             }
-
-            if (!string.IsNullOrEmpty(options.ExtraAudioUrl))
-            {
-                commandOptions.Add($"audio-add={options.ExtraAudioUrl}");
-            }
         }
 
         if (commandOptions.Count > 0)

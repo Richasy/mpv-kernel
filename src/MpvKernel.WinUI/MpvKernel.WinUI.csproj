@@ -22,7 +22,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="PlayerInteractiveControl.xaml" />
+  	<None Include="bin/$(Configuration)/$(TargetFramework)/$(AssemblyName).pri" Pack="true" PackagePath="lib/$(TargetFramework.TrimEnd('.0'))/" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="PlayerInteractivePanel.xaml" />
+    <None Remove="Themes\Generic.xaml" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" />
@@ -32,7 +37,12 @@
     <ProjectReference Include="..\MpvKernel.Core\MpvKernel.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Page Update="PlayerInteractiveControl.xaml">
+    <Page Update="PlayerInteractivePanel.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Themes\Generic.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>

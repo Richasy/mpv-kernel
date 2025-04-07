@@ -82,7 +82,7 @@ public sealed partial class MainWindow : Microsoft.UI.Xaml.Window
                 InitialSpeed = 2d,
             };
             await client.PlayAsync(file.Path, options);
-            await client.SetVideoOutput(Richasy.MpvKernel.Core.Enums.VideoOutputType.GpuNext);
+            await client.SetVideoOutputAsync(Richasy.MpvKernel.Core.Enums.VideoOutputType.GpuNext);
             await client.SetGpuApiAsync(Richasy.MpvKernel.Core.Enums.GpuApiType.D3D11);
             await client.SetGpuContextAsync(Richasy.MpvKernel.Core.Enums.GpuContextType.D3D11);
 

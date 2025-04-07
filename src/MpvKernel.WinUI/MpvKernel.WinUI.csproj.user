@@ -2,7 +2,12 @@
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup />
   <ItemGroup>
-    <Page Update="PlayerInteractiveControl.xaml">
+    <Page Update="Themes\Generic.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="PlayerInteractivePanel.xaml">
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>

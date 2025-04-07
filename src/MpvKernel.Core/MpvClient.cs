@@ -46,6 +46,11 @@ public sealed partial class MpvClient : IAsyncDisposable
     public bool IsDisposed { get; private set; }
 
     /// <summary>
+    /// MPV 句柄.
+    /// </summary>
+    public MpvInteropHandle Handle => _handle;
+
+    /// <summary>
     /// 创建一个新的 MPV 实例.
     /// </summary>
     /// <param name="options">初始化选项.</param>
@@ -78,6 +83,18 @@ public sealed partial class MpvClient : IAsyncDisposable
         _logger.LogInformation($"Set Mpv log level to {level}.");
         await Task.Run(() => errorCode = MpvNative.RequestLogMessages(_handle, level.ToMpvLogLevelString()));
         ThrowIfFailed(errorCode, "Mpv | set log level failed");
+    }
+
+    /// <summary>
+    /// 设置配置文件.
+    /// </summary>
+    /// <param name="filePath">配置文件地址.</param>
+    /// <returns><see cref="Task"/>.</returns>
+    public async Task SetConfigFileAsync(string filePath)
+    {
+        var errorCode = MpvError.Success;
+        await Task.Run(() => errorCode = MpvNative.LoadConfigFile(_handle, filePath));
+        ThrowIfFailed(errorCode, "Mpv | load config file failed");
     }
 
     /// <summary>
