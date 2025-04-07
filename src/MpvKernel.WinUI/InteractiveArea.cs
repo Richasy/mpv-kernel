@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Richasy. All rights reserved.
 // Licensed under the MIT License.
 
-namespace MpvKernel.WinUI;
+namespace Richasy.MpvKernel.WinUI;
 
 /// <summary>
 /// 交互区域.

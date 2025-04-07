@@ -7,7 +7,7 @@ using Microsoft.UI.Xaml.Input;
 using Richasy.MpvKernel.Core;
 using Windows.Foundation;
 
-namespace MpvKernel.WinUI;
+namespace Richasy.MpvKernel.WinUI;
 
 /// <summary>
 /// 播放器交互面板.

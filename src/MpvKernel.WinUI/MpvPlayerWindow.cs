@@ -9,7 +9,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Hosting;
 using Richasy.MpvKernel.Core;
 
-namespace MpvKernel.WinUI;
+namespace Richasy.MpvKernel.WinUI;
 
 /// <summary>
 /// MPV 独立播放窗口.

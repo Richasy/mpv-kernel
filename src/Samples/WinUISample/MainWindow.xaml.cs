@@ -3,7 +3,7 @@
 
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
-using MpvKernel.WinUI;
+using Richasy.MpvKernel.WinUI;
 using Richasy.MpvKernel;
 using Richasy.MpvKernel.Core;
 using Richasy.MpvKernel.Core.Models;

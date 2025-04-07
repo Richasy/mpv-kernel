@@ -2,10 +2,10 @@
 // Licensed under the MIT License.
 
 using Microsoft.UI.Xaml.Controls.Primitives;
-using MpvKernel.WinUI;
 using Richasy.MpvKernel.Core;
 using Richasy.MpvKernel.Core.Enums;
 using Richasy.MpvKernel.Core.Models;
+using Richasy.MpvKernel.WinUI;
 using Richasy.WinUIKernel.Share.Base;
 
 namespace WinUISample;
