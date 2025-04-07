@@ -51,17 +51,13 @@ public sealed partial class PlayerInteractiveControl : UserControl
         var width = ActualWidth;
         var sideWidth = Math.Max(80, width / 5d);
 
-        if (point.Position.X < sideWidth)
+        if (point.Position.X > width - sideWidth)
         {
-            _interactiveArea = InteractiveArea.Left;
-        }
-        else if (point.Position.X > width - sideWidth)
-        {
-            _interactiveArea = InteractiveArea.Right;
+            _interactiveArea = InteractiveArea.Aside;
         }
         else
         {
-            _interactiveArea = InteractiveArea.Middle;
+            _interactiveArea = InteractiveArea.Main;
         }
 
         CapturePointer(e.Pointer);
@@ -158,7 +154,7 @@ public sealed partial class PlayerInteractiveControl : UserControl
         }
         else if (_tapCount == 1)
         {
-            // 处理单击（如果需要）
+            _notifyAction?.Invoke(MpvUIEventId.Tapped, default);
         }
 
         _tapCount = 0;
@@ -168,10 +164,7 @@ public sealed partial class PlayerInteractiveControl : UserControl
     {
         switch (_interactiveArea)
         {
-            case InteractiveArea.Left:
-                // 左侧调整亮度之类的.
-                break;
-            case InteractiveArea.Middle:
+            case InteractiveArea.Main:
                 {
                     // 中间区域调整播放进度.
                     if (Math.Abs(deltaX) > 2 && Math.Abs(deltaX) > Math.Abs(deltaY))
@@ -186,7 +179,7 @@ public sealed partial class PlayerInteractiveControl : UserControl
                 }
 
                 break;
-            case InteractiveArea.Right:
+            case InteractiveArea.Aside:
                 {
                     // 只处理纵向滑动.
                     if (Math.Abs(deltaY) > 5 && Math.Abs(deltaY) > Math.Abs(deltaX))
@@ -211,7 +204,7 @@ public sealed partial class PlayerInteractiveControl : UserControl
 
     private async void HandleManipulationCompleted()
     {
-        if (_interactiveArea == InteractiveArea.Middle && Math.Abs(_totalDeltaX) > 10)
+        if (_interactiveArea == InteractiveArea.Main && Math.Abs(_totalDeltaX) > 10)
         {
             // 处理进度变化.
             var newPos = await GetNewPositionAsync();

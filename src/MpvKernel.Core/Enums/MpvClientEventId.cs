@@ -19,6 +19,11 @@ public enum MpvClientEventId
     VolumeChanged,
 
     /// <summary>
+    /// 播放速度发生变化.
+    /// </summary>
+    SpeedChanged,
+
+    /// <summary>
     /// 视频时长发生变化.
     /// </summary>
     DurationChanged,

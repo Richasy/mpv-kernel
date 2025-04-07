@@ -43,7 +43,6 @@ public sealed partial class MainWindow : Microsoft.UI.Xaml.Window
             }
 
             var client = await MpvClient.CreateAsync();
-            client.DataNotify += (_, args) => System.Diagnostics.Debug.WriteLine($"{args.Id}: {args.Data}");
             await client.SetLogLevelAsync(MpvLogLevel.Info);
             await client.UseIdleAsync(true);
             var playerWindow = new MpvPlayerWindow(client, DispatcherQueue);
@@ -79,6 +78,8 @@ public sealed partial class MainWindow : Microsoft.UI.Xaml.Window
             var options = new MpvPlayOptions
             {
                 WindowHandle = playerWindow.Handle,
+                StartPosition = 10,
+                InitialSpeed = 2d,
             };
             await client.PlayAsync(file.Path, options);
             await client.SetVideoOutput(Richasy.MpvKernel.Core.Enums.VideoOutputType.GpuNext);

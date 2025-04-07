@@ -50,6 +50,10 @@ public sealed partial class PlayerOverlay : LayoutUserControlBase, IMpvUIElement
             ProgressSliderFake.Visibility = Microsoft.UI.Xaml.Visibility.Visible;
             ProgressSliderFake.Value = (double)(double)data;
         }
+        else if (id == MpvUIEventId.Tapped)
+        {
+            PlayerControlPanel.Visibility = PlayerControlPanel.Visibility == Microsoft.UI.Xaml.Visibility.Visible ? Microsoft.UI.Xaml.Visibility.Collapsed : Microsoft.UI.Xaml.Visibility.Visible;
+        }
     }
 
     /// <inheritdoc/>

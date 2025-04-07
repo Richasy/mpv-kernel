@@ -103,5 +103,10 @@ public sealed partial class MpvClient
             var isOnTop = Marshal.PtrToStructure<MpvNode>(eventProp.DataPtr);
             SendNotify(MpvClientEventId.CompactOverlayChanged, isOnTop.Flag != 0);
         }
+        else if (eventProp.Name == "speed")
+        {
+            var speed = Marshal.PtrToStructure<double>(eventProp.DataPtr);
+            SendNotify(MpvClientEventId.SpeedChanged, speed);
+        }
     }
 }

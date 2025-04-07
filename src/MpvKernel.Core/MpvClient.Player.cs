@@ -20,9 +20,10 @@ public sealed partial class MpvClient
         }
 
         _cachedDuration = default;
-        _cachedSnapshot = MpvPlayerSnapshot.Create(filePath, options);
+        _cachedSnapshot = new(filePath, options);
         var errorCode = MpvError.Success;
-        List<string> commandArgs = ["loadfile", $"\"{filePath}\""];
+        List<string> commandArgs = ["loadfile", $"\"{filePath}\"", "replace", "0"];
+        List<string> commandOptions = [];
 
         if (options != null)
         {
@@ -32,6 +33,57 @@ public sealed partial class MpvClient
                 await Task.Run(() => errorCode = MpvNative.SetOption(_handle, "wid", MpvFormat.Int64, ref node));
                 ThrowIfFailed(errorCode, "Mpv | set wid failed");
             }
+
+            if (options.EnableYtdl != null)
+            {
+                await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "ytdl", options.EnableYtdl.Value ? "yes" : "no"));
+                ThrowIfFailed(errorCode, "Mpv | set ytdl failed");
+            }
+
+            if (options.EnableCookies != null)
+            {
+                await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "cookies", options.EnableCookies.Value ? "yes" : "no"));
+                ThrowIfFailed(errorCode, "Mpv | set cookies failed");
+            }
+
+            if (!string.IsNullOrEmpty(options.UserAgent))
+            {
+                await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "user-agent", options.UserAgent));
+                ThrowIfFailed(errorCode, "Mpv | set user-agent failed");
+            }
+
+            if (options.HttpHeaders != null)
+            {
+                var headers = options.HttpHeaders.Select(kvp => $"{kvp.Key}: {kvp.Value}").ToArray();
+                var headerStr = string.Join("\n", headers);
+                await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "http-header-fields", headerStr));
+            }
+
+            if (options.StartPosition != null)
+            {
+                commandOptions.Add($"start={Math.Round(options.StartPosition.Value)}");
+            }
+
+            if (options.InitialVolume != null)
+            {
+                commandOptions.Add($"volume={Math.Round(options.InitialVolume.Value)}");
+            }
+
+            if (options.InitialSpeed != null)
+            {
+                commandOptions.Add($"speed={Math.Round(options.InitialSpeed.Value)}");
+            }
+
+            if (!string.IsNullOrEmpty(options.ExtraAudioUrl))
+            {
+                commandOptions.Add($"audio-add={options.ExtraAudioUrl}");
+            }
+        }
+
+        if (commandOptions.Count > 0)
+        {
+            var optionStr = string.Join(',', commandOptions);
+            commandArgs.Add(optionStr);
         }
 
         await Task.Run(() => errorCode = MpvNative.SetCommandString(_handle, string.Join(' ', commandArgs)));
@@ -73,15 +125,12 @@ public sealed partial class MpvClient
             throw new InvalidOperationException("Replay failed, please play a file first.");
         }
 
-        if (_cachedSnapshot.Type == MpvFileType.LocalFile)
+        if (_cachedSnapshot.Options?.StartPosition != null)
         {
-            if (_cachedSnapshot.Options?.StartPosition != null)
-            {
-                _cachedSnapshot.Options.StartPosition = null;
-            }
-
-            await PlayAsync(_cachedSnapshot.FilePath!, _cachedSnapshot.Options);
+            _cachedSnapshot.Options.StartPosition = null;
         }
+
+        await PlayAsync(_cachedSnapshot.FilePath!, _cachedSnapshot.Options);
     }
 
     /// <summary>
@@ -197,7 +246,7 @@ public sealed partial class MpvClient
     /// <exception cref="ArgumentOutOfRangeException">Thrown when the volume value is less than 0 or greater than 100.</exception>
     public async Task SetVolumeAsync(double volume)
     {
-        if (volume < 0 || volume > 100)
+        if (volume is < 0 or > 100)
         {
             throw new ArgumentOutOfRangeException(nameof(volume), "Volume must be between 0 and 100.");
         }
@@ -206,5 +255,37 @@ public sealed partial class MpvClient
         var node = new MpvNode(volume);
         await Task.Run(() => errorCode = MpvNative.SetProperty(_handle, "volume", MpvFormat.Double, ref node));
         ThrowIfFailed(errorCode, "Mpv | set volume failed");
+    }
+
+    /// <summary>
+    /// 获取当前播放速度.
+    /// </summary>
+    /// <returns>播放速度.</returns>
+    public async Task<double> GetSpeedAsync()
+    {
+        var errorCode = MpvError.Success;
+        var result = new MpvNode();
+        await Task.Run(() => errorCode = MpvNative.GetProperty(_handle, "speed", MpvFormat.Double, out result));
+        ThrowIfFailed(errorCode, "Mpv | get speed failed");
+        return result.DoubleValue;
+    }
+
+    /// <summary>
+    /// 设置播放速度.
+    /// </summary>
+    /// <param name="speed">播放速度.</param>
+    /// <returns><see cref="Task"/>.</returns>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    public async Task SetSpeedAsync(double speed)
+    {
+        if (speed is < 0.01 or > 100)
+        {
+            throw new ArgumentOutOfRangeException(nameof(speed), "Speed must be between 0.01 and 100.");
+        }
+
+        var errorCode = MpvError.Success;
+        var node = new MpvNode(speed);
+        await Task.Run(() => errorCode = MpvNative.SetProperty(_handle, "speed", MpvFormat.Double, ref node));
+        ThrowIfFailed(errorCode, "Mpv | set speed failed");
     }
 }

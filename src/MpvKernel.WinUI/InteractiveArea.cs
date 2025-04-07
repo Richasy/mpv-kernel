@@ -14,17 +14,12 @@ public enum InteractiveArea
     None,
 
     /// <summary>
-    /// 左侧调整区域.
+    /// 主要调整区域.
     /// </summary>
-    Left,
+    Main,
 
     /// <summary>
-    /// 中间调整区域.
+    /// 边缘调整区域.
     /// </summary>
-    Middle,
-
-    /// <summary>
-    /// 右侧调整区域.
-    /// </summary>
-    Right,
+    Aside,
 }

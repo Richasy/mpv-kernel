@@ -22,4 +22,9 @@ public enum MpvUIEventId
     /// 光标移动.
     /// </summary>
     PointerMoved,
+
+    /// <summary>
+    /// 单击.
+    /// </summary>
+    Tapped,
 }
