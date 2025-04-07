@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Richasy. All rights reserved.
 // Licensed under the MIT License.
 
-using Microsoft.UI.Input;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Richasy.MpvKernel.Core;
@@ -15,12 +15,14 @@ namespace MpvKernel.WinUI;
 public sealed partial class PlayerInteractiveControl : UserControl
 {
     private readonly MpvClient _client;
-    private readonly GestureRecognizer _gestureRecognizer;
     private readonly Action<MpvUIEventId, object>? _notifyAction;
+    private readonly DispatcherTimer _tapTimer;
 
     private Point _startPoint;
     private InteractiveArea _interactiveArea;
     private double _totalDeltaX; // 用于进度控制.
+    private int _tapCount;
+    private bool _isManipulating;
 
     /// <summary>
     /// 初始化一个新的 <see cref="PlayerInteractiveControl"/> 实例.
@@ -30,14 +32,12 @@ public sealed partial class PlayerInteractiveControl : UserControl
         InitializeComponent();
         _notifyAction = notifyAction;
         _client = client;
-        _gestureRecognizer = new GestureRecognizer
+
+        _tapTimer = new DispatcherTimer
         {
-            GestureSettings = GetDefaultSettings()
+            Interval = TimeSpan.FromMilliseconds(300),
         };
-        _gestureRecognizer.Tapped += OnRecognizerTapped;
-        _gestureRecognizer.ManipulationStarted += OnRecognizerManipulationStarted;
-        _gestureRecognizer.ManipulationCompleted += OnRecognizerManipulationCompleted;
-        _gestureRecognizer.ManipulationUpdated += OnRecognizerManipulationUpdated;
+        _tapTimer.Tick += OnTapTimerTick;
 
         HorizontalAlignment = Microsoft.UI.Xaml.HorizontalAlignment.Stretch;
         VerticalAlignment = Microsoft.UI.Xaml.VerticalAlignment.Stretch;
@@ -46,8 +46,6 @@ public sealed partial class PlayerInteractiveControl : UserControl
     /// <inheritdoc/>
     protected override void OnPointerPressed(PointerRoutedEventArgs e)
     {
-        base.OnPointerPressed(e);
-
         var point = e.GetCurrentPoint(this);
         _startPoint = point.Position;
         var width = ActualWidth;
@@ -67,39 +65,66 @@ public sealed partial class PlayerInteractiveControl : UserControl
         }
 
         CapturePointer(e.Pointer);
-        var p = e.GetCurrentPoint(this);
-        if (p != null)
-        {
-            _gestureRecognizer.ProcessDownEvent(e.GetCurrentPoint(this));
-        }
-
         e.Handled = true;
     }
 
     /// <inheritdoc/>
     protected override void OnPointerMoved(PointerRoutedEventArgs e)
     {
-        base.OnPointerMoved(e);
         _notifyAction?.Invoke(MpvUIEventId.PointerMoved, e);
-        if (PointerCaptures?.Any(p => p.PointerId == e.Pointer.PointerId) != true || e.GetIntermediatePoints(this) is null)
+        if (PointerCaptures?.Any(p => p.PointerId == e.Pointer.PointerId) != true)
         {
             return;
         }
 
-        _gestureRecognizer.ProcessMoveEvents(e.GetIntermediatePoints(this));
+        var currentPoint = e.GetCurrentPoint(this);
+        var deltaX = currentPoint.Position.X - _startPoint.X;
+        var deltaY = currentPoint.Position.Y - _startPoint.Y;
+
+        if (!_isManipulating && (Math.Abs(deltaX) > 5 || Math.Abs(deltaY) > 5))
+        {
+            _isManipulating = true;
+            _tapTimer.Stop();
+            _tapCount = 0;
+        }
+
+        if (_isManipulating)
+        {
+            _totalDeltaX += deltaX;
+            HandleManipulationUpdate(deltaX, deltaY);
+            _startPoint = currentPoint.Position;
+        }
+
         e.Handled = true;
     }
 
     /// <inheritdoc/>
     protected override void OnPointerReleased(PointerRoutedEventArgs e)
     {
-        base.OnPointerReleased(e);
-        if (PointerCaptures?.Any(p => p.PointerId == e.Pointer.PointerId) != true || e.GetIntermediatePoints(this) is null)
+        if (PointerCaptures?.Any(p => p.PointerId == e.Pointer.PointerId) != true)
         {
             return;
         }
 
-        _gestureRecognizer.ProcessUpEvent(e.GetCurrentPoint(this));
+        var currentPoint = e.GetCurrentPoint(this);
+        var deltaX = currentPoint.Position.X - _startPoint.X;
+        var deltaY = currentPoint.Position.Y - _startPoint.Y;
+
+        if (!_isManipulating)
+        {
+            // 处理点击/双击
+            _tapCount++;
+            if (_tapCount == 1)
+            {
+                _tapTimer.Start();
+            }
+        }
+        else
+        {
+            // 处理操作完成
+            HandleManipulationCompleted();
+        }
+
         ReleasePointerCapture(e.Pointer);
         e.Handled = true;
     }
@@ -108,25 +133,19 @@ public sealed partial class PlayerInteractiveControl : UserControl
     protected override void OnPointerCanceled(PointerRoutedEventArgs e)
     {
         base.OnPointerCanceled(e);
-        _gestureRecognizer.CompleteGesture();
+        _tapTimer.Stop();
+        _tapCount = 0;
+        _isManipulating = false;
         ReleasePointerCapture(e.Pointer);
         e.Handled = true;
     }
 
-    private static GestureSettings GetDefaultSettings()
+    private async void OnTapTimerTick(object? sender, object? e)
     {
-        return GestureSettings.ManipulationTranslateX |
-            GestureSettings.ManipulationTranslateY |
-            GestureSettings.Tap |
-            GestureSettings.DoubleTap |
-            GestureSettings.Hold |
-            GestureSettings.HoldWithMouse;
-    }
-
-    private async void OnRecognizerTapped(GestureRecognizer sender, TappedEventArgs args)
-    {
-        if (args.TapCount == 2)
+        _tapTimer.Stop();
+        if (_tapCount == 2)
         {
+            // 处理双击
             var state = await _client.GetPlayerStateAsync();
             if (state == Richasy.MpvKernel.Core.Enums.MpvPlayerState.Playing)
             {
@@ -136,25 +155,21 @@ public sealed partial class PlayerInteractiveControl : UserControl
             {
                 await _client.ResumeAsync();
             }
-
-            var newState = await _client.GetPlayerStateAsync();
         }
+        else if (_tapCount == 1)
+        {
+            // 处理单击（如果需要）
+        }
+
+        _tapCount = 0;
     }
 
-    private void OnRecognizerManipulationStarted(GestureRecognizer sender, ManipulationStartedEventArgs args)
-        => _startPoint = args.Position;
-
-    private async void OnRecognizerManipulationUpdated(GestureRecognizer sender, ManipulationUpdatedEventArgs args)
+    private async void HandleManipulationUpdate(double deltaX, double deltaY)
     {
-        var deltaX = args.Position.X - _startPoint.X;
-        var deltaY = args.Position.Y - _startPoint.Y;
-        _totalDeltaX += deltaX;
         switch (_interactiveArea)
         {
             case InteractiveArea.Left:
-                {
-                    // 左侧调整亮度之类的.
-                }
+                // 左侧调整亮度之类的.
                 break;
             case InteractiveArea.Middle:
                 {
@@ -192,11 +207,9 @@ public sealed partial class PlayerInteractiveControl : UserControl
             default:
                 break;
         }
-
-        _startPoint = args.Position;
     }
 
-    private async void OnRecognizerManipulationCompleted(GestureRecognizer sender, ManipulationCompletedEventArgs args)
+    private async void HandleManipulationCompleted()
     {
         if (_interactiveArea == InteractiveArea.Middle && Math.Abs(_totalDeltaX) > 10)
         {
@@ -212,6 +225,7 @@ public sealed partial class PlayerInteractiveControl : UserControl
         _startPoint = new(0, 0);
         _totalDeltaX = 0;
         _interactiveArea = InteractiveArea.None;
+        _isManipulating = false;
     }
 
     private async Task<double?> GetNewPositionAsync()
