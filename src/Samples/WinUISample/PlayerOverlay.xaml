@@ -45,10 +45,8 @@
             Visibility="Collapsed" />
         <StackPanel
             x:Name="PlayerControlPanel"
-            MinWidth="400"
-            Margin="20"
             Padding="12,8"
-            HorizontalAlignment="Center"
+            HorizontalAlignment="Stretch"
             VerticalAlignment="Bottom"
             Background="{ThemeResource AcrylicInAppFillColorDefaultBrush}"
             CornerRadius="{StaticResource ControlCornerRadius}"

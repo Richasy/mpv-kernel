@@ -120,7 +120,7 @@ public sealed class MpvPlayerWindow : IAsyncDisposable
 
     private void OnWindowChanged(AppWindow sender, AppWindowChangedEventArgs args)
     {
-        if (args.DidSizeChange || args.DidVisibilityChange)
+        if (args.DidSizeChange || args.DidVisibilityChange || args.DidPresenterChange)
         {
             UpdateXamlSourcePosition();
         }
@@ -130,11 +130,14 @@ public sealed class MpvPlayerWindow : IAsyncDisposable
 
     private void UpdateXamlSourcePosition()
     {
+        var size = _topWindow.Presenter.Kind == AppWindowPresenterKind.FullScreen
+            ? _topWindow.Size
+            : _topWindow.ClientSize;
         _xamlSource.SiteBridge.MoveAndResize(new Windows.Graphics.RectInt32(
             0,
             0,
-            _topWindow.ClientSize.Width,
-            _topWindow.ClientSize.Height));
+            size.Width,
+            size.Height));
     }
 
     private void HandleInteractiveNotify(MpvUIEventId id, object data)
