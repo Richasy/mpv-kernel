@@ -67,21 +67,48 @@ public sealed class MpvPlayerWindow : IAsyncDisposable
     public void Show() => _topWindow.Show();
 
     /// <summary>
+    /// 设置底部 UI 元素.
+    /// </summary>
+    /// <param name="element"></param>
+    public void SetBackgroundElement(UIElement element)
+    {
+        if (_rootGrid.Children.Any(p => (p as Grid)?.Name == "bkg"))
+        {
+            var oldElement = _rootGrid.Children[0];
+            _rootGrid.Children.RemoveAt(0);
+        }
+        if (element is not null)
+        {
+            var grid = new Grid()
+            {
+                Name = "bkg",
+            };
+            grid.Children.Add(element);
+            _rootGrid.Children.Insert(0, grid);
+        }
+    }
+
+    /// <summary>
     /// 设置要显示的 UI 元素.
     /// </summary>
     /// <param name="element">UI 元素.</param>
-    public void SetUIElement(UIElement? element)
+    public void SetUIElement(UIElement element)
     {
-        if (_rootGrid.Children.Count > 1)
+        if (_rootGrid.Children.Any(p => (p as Grid)?.Name == "frg"))
         {
-            var oldElement = _rootGrid.Children[1] as IMpvUIElement;
+            var oldElement = _rootGrid.Children.Last() as IMpvUIElement;
             oldElement?.Disconnect();
-            _rootGrid.Children.RemoveAt(1);
+            _rootGrid.Children.RemoveAt(_rootGrid.Children.Count - 1);
         }
 
         if (element is not null)
         {
-            _rootGrid.Children.Add(element);
+            var grid = new Grid()
+            {
+                Name = "frg",
+            };
+            grid.Children.Add(element);
+            _rootGrid.Children.Add(grid);
         }
     }
 
