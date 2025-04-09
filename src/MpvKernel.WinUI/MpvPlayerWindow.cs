@@ -62,6 +62,11 @@ public sealed class MpvPlayerWindow : IAsyncDisposable
     public IntPtr Handle { get; }
 
     /// <summary>
+    /// XAML 根元素.
+    /// </summary>
+    public XamlRoot? XamlRoot => _xamlSource?.Content?.XamlRoot;
+
+    /// <summary>
     /// 显示窗口.
     /// </summary>
     public void Show() => _topWindow.Show();
