@@ -112,6 +112,20 @@ public sealed partial class MpvClient : IAsyncDisposable
     }
 
     /// <summary>
+    /// 是否允许保持开启状态（播放完成后保持最后一帧显示）
+    /// </summary>
+    /// <param name="isKeepOpen">是否开启</param>
+    /// <returns><see cref="Task"/>.</returns>
+    public async Task UseKeepOpenAsync(bool isKeepOpen)
+    {
+        var errorCode = MpvError.Success;
+        var state = isKeepOpen ? "yes" : "no";
+        _logger.LogInformation($"Set Mpv keep open to {state}.");
+        await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "keep-open", state));
+        ThrowIfFailed(errorCode, "Mpv | set keep open failed");
+    }
+
+    /// <summary>
     /// 初始化（启动事件轮询）.
     /// </summary>
     private void Run()

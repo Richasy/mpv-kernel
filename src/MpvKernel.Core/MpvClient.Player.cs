@@ -3,6 +3,7 @@
 
 using Richasy.MpvKernel.Core.Enums;
 using Richasy.MpvKernel.Core.Models;
+using System.Threading.Tasks;
 
 namespace Richasy.MpvKernel.Core;
 
@@ -113,19 +114,32 @@ public sealed partial class MpvClient
     /// 重新播放当前文件.
     /// </summary>
     /// <returns><see cref="Task"/>.</returns>
-    public async Task ReplayAsync()
+    public async Task ReplayAsync(double startPos = 0d)
     {
         if (_cachedSnapshot == null)
         {
             throw new InvalidOperationException("Replay failed, please play a file first.");
         }
 
-        if (_cachedSnapshot.Options?.StartPosition != null)
+        if (startPos > 0)
         {
-            _cachedSnapshot.Options.StartPosition = null;
+            _cachedSnapshot.Options ??= new MpvPlayOptions();
+            _cachedSnapshot.Options.StartPosition = startPos;
         }
 
         await PlayAsync(_cachedSnapshot.FilePath!, _cachedSnapshot.Options);
+    }
+
+    /// <summary>
+    /// 停止播放.
+    /// </summary>
+    /// <returns><see cref="Task"/>.</returns>
+    public async Task StopAsync()
+    {
+        var errorCode = MpvError.Success;
+        var node = new MpvNode(true);
+        await Task.Run(() => errorCode = MpvNative.SetProperty(_handle, "stop", MpvFormat.Flag, ref node));
+        ThrowIfFailed(errorCode, "Mpv | set stop failed");
     }
 
     /// <summary>

@@ -9,7 +9,7 @@ namespace Richasy.MpvKernel.WinUI;
 /// <summary>
 /// 光标网格.
 /// </summary>
-internal partial class CursorGrid : Grid
+internal sealed partial class CursorGrid : Grid
 {
     /// <summary>
     /// 隐藏光标.

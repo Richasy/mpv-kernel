@@ -7,5 +7,5 @@ internal sealed class MpvPlayerSnapshot(string? filePath, MpvPlayOptions? option
 {
     public string? FilePath { get; } = filePath;
 
-    public MpvPlayOptions? Options { get; } = options;
+    public MpvPlayOptions? Options { get; internal set; } = options;
 }
