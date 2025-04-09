@@ -21,7 +21,7 @@ public sealed class MpvPlayerWindow : IAsyncDisposable
 
     private readonly AppWindow _topWindow;
     private readonly DesktopWindowXamlSource _xamlSource;
-    private readonly Grid _rootGrid;
+    private readonly CursorGrid _rootGrid;
 
     /// <summary>
     /// Initializes a new instance of the player window.
@@ -36,7 +36,7 @@ public sealed class MpvPlayerWindow : IAsyncDisposable
         _topWindow.Destroying += OnWindowDestroying;
         _topWindow.Changed += OnWindowChanged;
 
-        _rootGrid = new Grid();
+        _rootGrid = new CursorGrid();
         _rootGrid.Children.Add(new PlayerInteractivePanel(client, HandleInteractiveNotify));
 
         _xamlSource = new DesktopWindowXamlSource();
@@ -65,6 +65,28 @@ public sealed class MpvPlayerWindow : IAsyncDisposable
     /// 显示窗口.
     /// </summary>
     public void Show() => _topWindow.Show();
+
+    /// <summary>
+    /// 隐藏窗口.
+    /// </summary>
+    public void Hide() => _topWindow.Hide();
+
+    /// <summary>
+    /// 关闭窗口.
+    /// </summary>
+    public void Close() => _topWindow.Destroy();
+
+    /// <summary>
+    /// 隱藏光标.
+    /// </summary>
+    public void HideCursor()
+        => _rootGrid?.HideCursor();
+
+    /// <summary>
+    /// 显示光标.
+    /// </summary>
+    public void ShowCursor()
+        => _rootGrid?.ShowCursor();
 
     /// <summary>
     /// 设置底部 UI 元素.
@@ -96,7 +118,7 @@ public sealed class MpvPlayerWindow : IAsyncDisposable
     {
         if (_rootGrid.Children.Any(p => (p as Grid)?.Name == "frg"))
         {
-            var oldElement = _rootGrid.Children.Last() as IMpvUIElement;
+            var oldElement = (_rootGrid.Children.Last() as Grid).Children.First() as IMpvUIElement;
             oldElement?.Disconnect();
             _rootGrid.Children.RemoveAt(_rootGrid.Children.Count - 1);
         }
@@ -130,9 +152,9 @@ public sealed class MpvPlayerWindow : IAsyncDisposable
         IsDisposed = true;
         if (_topWindow != null)
         {
-            if (_rootGrid?.Children.Count > 1)
+            if (_rootGrid.Children.Any(p => (p as Grid)?.Name == "frg"))
             {
-                var oldElement = _rootGrid.Children[1] as IMpvUIElement;
+                var oldElement = (_rootGrid.Children.Last() as Grid).Children.First() as IMpvUIElement;
                 oldElement?.Disconnect();
             }
 
@@ -170,9 +192,9 @@ public sealed class MpvPlayerWindow : IAsyncDisposable
     private void HandleInteractiveNotify(MpvUIEventId id, object data)
     {
         UINotify?.Invoke(this, new(id, data));
-        if (_rootGrid?.Children.Count > 1)
+        if (_rootGrid.Children.Any(p => (p as Grid)?.Name == "frg"))
         {
-            var element = _rootGrid.Children[1] as IMpvUIElement;
+            var element = (_rootGrid.Children.Last() as Grid).Children.First() as IMpvUIElement;
             element?.HandleUINotify(id, data);
         }
     }
