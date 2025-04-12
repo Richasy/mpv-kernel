@@ -39,8 +39,8 @@ public sealed partial class PlayerInteractivePanel : Control
         };
         _tapTimer.Tick += OnTapTimerTick;
 
-        HorizontalAlignment = Microsoft.UI.Xaml.HorizontalAlignment.Stretch;
-        VerticalAlignment = Microsoft.UI.Xaml.VerticalAlignment.Stretch;
+        HorizontalAlignment = HorizontalAlignment.Stretch;
+        VerticalAlignment = VerticalAlignment.Stretch;
     }
 
     /// <inheritdoc/>
@@ -142,14 +142,18 @@ public sealed partial class PlayerInteractivePanel : Control
         if (_tapCount == 2)
         {
             // 处理双击
-            var state = await _client.GetPlayerStateAsync();
-            if (state == Richasy.MpvKernel.Core.Enums.MpvPlayerState.Playing)
+            var stateResult = await _client.GetPlayerStateAsync();
+            if(stateResult.IsSuccess)
             {
-                await _client.PauseAsync();
-            }
-            else if (state == Richasy.MpvKernel.Core.Enums.MpvPlayerState.Paused)
-            {
-                await _client.ResumeAsync();
+                var state = stateResult.Value;
+                if (state == Richasy.MpvKernel.Core.Enums.MpvPlayerState.Playing)
+                {
+                    await _client.PauseAsync();
+                }
+                else if (state == Richasy.MpvKernel.Core.Enums.MpvPlayerState.Paused)
+                {
+                    await _client.ResumeAsync();
+                }
             }
         }
         else if (_tapCount == 1)
@@ -188,10 +192,13 @@ public sealed partial class PlayerInteractivePanel : Control
                         var volumeChange = -deltaY / 10;
                         DispatcherQueue.TryEnqueue(async () =>
                         {
-                            var currentVolume = await _client.GetVolumeAsync();
-                            var newVolume = Math.Max(0, Math.Min(100, currentVolume + volumeChange));
-                            _notifyAction?.Invoke(MpvUIEventId.VolumeChanged, newVolume);
-                            await _client.SetVolumeAsync(newVolume);
+                            var currentVolumeResult = await _client.GetVolumeAsync();
+                            if(currentVolumeResult.IsSuccess)
+                            {
+                                var newVolume = Math.Max(0, Math.Min(100, currentVolumeResult.Value + volumeChange));
+                                _notifyAction?.Invoke(MpvUIEventId.VolumeChanged, newVolume);
+                                await _client.SetVolumeAsync(newVolume);
+                            }
                         });
                     }
                 }
@@ -223,12 +230,25 @@ public sealed partial class PlayerInteractivePanel : Control
 
     private async Task<double?> GetNewPositionAsync()
     {
-        var state = await _client.GetPlayerStateAsync();
+        var stateResult = await _client.GetPlayerStateAsync();
+        if(stateResult.IsFailed)
+        {
+            return null;
+        }
+
+        var state = stateResult.Value;
         var isValidState = state is Richasy.MpvKernel.Core.Enums.MpvPlayerState.Playing or Richasy.MpvKernel.Core.Enums.MpvPlayerState.Paused;
         if (isValidState)
         {
-            var duration = await _client.GetDurationAsync();
-            var currentPosition = await _client.GetCurrentPositionAsync();
+            var durationResult = await _client.GetDurationAsync();
+            var currentPositionResult = await _client.GetCurrentPositionAsync();
+            if(durationResult.IsFailed || currentPositionResult.IsFailed)
+            {
+                return default;
+            }
+
+            var duration = durationResult.Value;
+            var currentPosition = currentPositionResult.Value;
             var newPosition = currentPosition + (_totalDeltaX / ActualWidth / 2 * duration);
             if (newPosition < 0)
             {

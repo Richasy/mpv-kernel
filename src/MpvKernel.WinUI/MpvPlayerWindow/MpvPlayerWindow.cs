@@ -14,10 +14,11 @@ namespace Richasy.MpvKernel.WinUI;
 /// <summary>
 /// MPV 独立播放窗口.
 /// </summary>
-public sealed class MpvPlayerWindow : IAsyncDisposable
+public sealed partial class MpvPlayerWindow : IAsyncDisposable
 {
     private readonly MpvClient _client;
     private readonly DispatcherQueue _dispatcherQueue;
+    private readonly DispatcherQueueTimer _autoCheckTimer;
 
     private readonly AppWindow _topWindow;
     private readonly DesktopWindowXamlSource _xamlSource;
@@ -29,6 +30,10 @@ public sealed class MpvPlayerWindow : IAsyncDisposable
     public MpvPlayerWindow(MpvClient client, DispatcherQueue dispatcherQueue)
     {
         _dispatcherQueue = dispatcherQueue;
+        _autoCheckTimer = dispatcherQueue.CreateTimer();
+        _autoCheckTimer.Interval = TimeSpan.FromMilliseconds(1000);
+        _autoCheckTimer.IsRepeating = true;
+        _autoCheckTimer.Tick += OnAutoCheckTimerTick;
 
         _client = client;
         _topWindow = AppWindow.Create();
@@ -45,26 +50,6 @@ public sealed class MpvPlayerWindow : IAsyncDisposable
 
         Handle = Win32Interop.GetWindowFromWindowId(_topWindow.Id);
     }
-
-    /// <summary>
-    /// UI 通知.
-    /// </summary>
-    public event EventHandler<MpvUINotifyEventArgs> UINotify;
-
-    /// <summary>
-    /// 对象是否已经被释放.
-    /// </summary>
-    public bool IsDisposed { get; private set; }
-
-    /// <summary>
-    /// 窗口句柄.
-    /// </summary>
-    public IntPtr Handle { get; }
-
-    /// <summary>
-    /// XAML 根元素.
-    /// </summary>
-    public XamlRoot? XamlRoot => _xamlSource?.Content?.XamlRoot;
 
     /// <summary>
     /// 显示窗口.
@@ -99,11 +84,12 @@ public sealed class MpvPlayerWindow : IAsyncDisposable
     /// <param name="element"></param>
     public void SetBackgroundElement(UIElement element)
     {
-        if (_rootGrid.Children.Any(p => (p as Grid)?.Name == "bkg"))
+        if (_rootGrid.Children.Any(p => p is Grid { Name: "bkg" }))
         {
             var oldElement = _rootGrid.Children[0];
             _rootGrid.Children.RemoveAt(0);
         }
+
         if (element is not null)
         {
             var grid = new Grid()
@@ -121,9 +107,9 @@ public sealed class MpvPlayerWindow : IAsyncDisposable
     /// <param name="element">UI 元素.</param>
     public void SetUIElement(UIElement element)
     {
-        if (_rootGrid.Children.Any(p => (p as Grid)?.Name == "frg"))
+        if (_rootGrid.Children.Any(p => p is Grid { Name: "frg" }))
         {
-            var oldElement = (_rootGrid.Children.Last() as Grid).Children.First() as IMpvUIElement;
+            var oldElement = (_rootGrid.Children.Last() as Grid)!.Children[0] as IMpvUIElement;
             oldElement?.Disconnect();
             _rootGrid.Children.RemoveAt(_rootGrid.Children.Count - 1);
         }
@@ -155,11 +141,17 @@ public sealed class MpvPlayerWindow : IAsyncDisposable
         }
 
         IsDisposed = true;
+        if (_autoCheckTimer != null)
+        {
+            _autoCheckTimer.Tick -= OnAutoCheckTimerTick;
+            _autoCheckTimer.Stop();
+        }
+
         if (_topWindow != null)
         {
-            if (_rootGrid.Children.Any(p => (p as Grid)?.Name == "frg"))
+            if (_rootGrid.Children.Any(p => p is Grid { Name: "frg" }))
             {
-                var oldElement = (_rootGrid.Children.Last() as Grid).Children.First() as IMpvUIElement;
+                var oldElement = (_rootGrid.Children.Last() as Grid)!.Children[0] as IMpvUIElement;
                 oldElement?.Disconnect();
             }
 
@@ -171,16 +163,6 @@ public sealed class MpvPlayerWindow : IAsyncDisposable
         _xamlSource?.Dispose();
         return _client.DisposeAsync();
     }
-
-    private void OnWindowChanged(AppWindow sender, AppWindowChangedEventArgs args)
-    {
-        if (args.DidSizeChange || args.DidVisibilityChange || args.DidPresenterChange)
-        {
-            UpdateXamlSourcePosition();
-        }
-    }
-
-    private async void OnWindowDestroying(AppWindow sender, object args) => await DisposeAsync();
 
     private void UpdateXamlSourcePosition()
     {
@@ -197,9 +179,9 @@ public sealed class MpvPlayerWindow : IAsyncDisposable
     private void HandleInteractiveNotify(MpvUIEventId id, object data)
     {
         UINotify?.Invoke(this, new(id, data));
-        if (_rootGrid.Children.Any(p => (p as Grid)?.Name == "frg"))
+        if (_rootGrid.Children.Any(p => p is Grid { Name: "frg" }))
         {
-            var element = (_rootGrid.Children.Last() as Grid).Children.First() as IMpvUIElement;
+            var element = (_rootGrid.Children.Last() as Grid)!.Children[0] as IMpvUIElement;
             element?.HandleUINotify(id, data);
         }
     }

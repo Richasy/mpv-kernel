@@ -142,7 +142,11 @@ public sealed partial class PlayerOverlay : LayoutUserControlBase, IMpvUIElement
             FileLoadingWidget.Visibility = Microsoft.UI.Xaml.Visibility.Collapsed;
             OverlayRect.Visibility = Microsoft.UI.Xaml.Visibility.Collapsed;
             PlayerControlPanel.Visibility = Microsoft.UI.Xaml.Visibility.Visible;
-            VolumeSlider.Value = (double)await _client.GetVolumeAsync();
+            var volumeResult = await _client.GetVolumeAsync();
+            if (volumeResult.IsSuccess)
+            {
+                VolumeSlider.Value = volumeResult.Value;
+            }
         });
     }
 
@@ -200,8 +204,8 @@ public sealed partial class PlayerOverlay : LayoutUserControlBase, IMpvUIElement
         var newValue = e.NewValue;
         DispatcherQueue.TryEnqueue(async () =>
         {
-            var currentVolume = await _client.GetVolumeAsync();
-            if (Math.Abs(newValue - currentVolume) < 1)
+            var currentVolumeResult = await _client.GetVolumeAsync();
+            if (currentVolumeResult.IsFailed || Math.Abs(newValue - currentVolumeResult.Value) < 1)
             {
                 return;
             }
@@ -212,7 +216,13 @@ public sealed partial class PlayerOverlay : LayoutUserControlBase, IMpvUIElement
 
     private async void OnPlayPauseButtonClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
-        var state = await _client.GetPlayerStateAsync();
+        var stateResult = await _client.GetPlayerStateAsync();
+        if (stateResult.IsFailed)
+        {
+            return;
+        }
+
+        var state = stateResult.Value;
         var isValidState = state is MpvPlayerState.Playing or MpvPlayerState.Paused;
         if (isValidState)
         {
@@ -253,13 +263,23 @@ public sealed partial class PlayerOverlay : LayoutUserControlBase, IMpvUIElement
 
     private async void OnFullScreenButtonClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
-        var isFullScreen = await _client.GetFullScreenStateAsync();
-        await _client.SetFullScreenState(!isFullScreen);
+        var isFullScreenResult = await _client.GetFullScreenStateAsync();
+        if (isFullScreenResult.IsFailed)
+        {
+            return;
+        }
+
+        await _client.SetFullScreenStateAsync(!isFullScreenResult.Value);
     }
 
     private async void OnCompactOverlayButtonClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
-        var isCompactOverlay = await _client.GetCompactOverlayStateAsync();
-        await _client.SetCompactOverlayState(!isCompactOverlay);
+        var isCompactOverlayResult = await _client.GetCompactOverlayStateAsync();
+        if (isCompactOverlayResult.IsFailed)
+        {
+            return;
+        }
+
+        await _client.SetCompactOverlayStateAsync(!isCompactOverlayResult.Value);
     }
 }

@@ -19,6 +19,11 @@ public enum MpvUIEventId
     VolumeChanged,
 
     /// <summary>
+    /// 状态检查结果.
+    /// </summary>
+    StateChecked,
+
+    /// <summary>
     /// 光标移动.
     /// </summary>
     PointerMoved,

@@ -1,11 +1,13 @@
 ﻿// Copyright (c) Richasy. All rights reserved.
 // Licensed under the MIT License.
 
+using FluentResults;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Richasy.MpvKernel.Core.Enums;
 using Richasy.MpvKernel.Core.Models;
 using System.Runtime.InteropServices;
+using static Richasy.MpvKernel.Core.Enums.MpvClientProperties;
 
 namespace Richasy.MpvKernel.Core;
 
@@ -61,15 +63,24 @@ public sealed partial class MpvClient : IAsyncDisposable
         var instanceHandle = MpvNative.Create();
         var instance = new MpvClient(instanceHandle, logger);
         await instance.InitializeAsync(options).ConfigureAwait(false);
-        MpvNative.ObserveProperty(instanceHandle, 0, "duration", MpvFormat.Double);
-        MpvNative.ObserveProperty(instanceHandle, 0, "time-pos", MpvFormat.Double);
-        MpvNative.ObserveProperty(instanceHandle, 0, "volume", MpvFormat.Double);
-        MpvNative.ObserveProperty(instanceHandle, 0, "speed", MpvFormat.Double);
-        MpvNative.ObserveProperty(instanceHandle, 0, "pause", MpvFormat.Flag);
-        MpvNative.ObserveProperty(instanceHandle, 0, "core-idle", MpvFormat.Flag);
-        MpvNative.ObserveProperty(instanceHandle, 0, "fullscreen", MpvFormat.Flag);
-        MpvNative.ObserveProperty(instanceHandle, 0, "ontop", MpvFormat.Flag);
+        await ObservePropertyAsync(Duration, MpvFormat.Double);
+        await ObservePropertyAsync(TimePosition, MpvFormat.Double);
+        await ObservePropertyAsync(Volume, MpvFormat.Double);
+        await ObservePropertyAsync(Speed, MpvFormat.Double);
+        await ObservePropertyAsync(Pause, MpvFormat.Flag);
+        await ObservePropertyAsync(CoreIdle, MpvFormat.Flag);
+        await ObservePropertyAsync(Seeking, MpvFormat.Flag);
+        await ObservePropertyAsync(FullScreen, MpvFormat.Flag);
+        await ObservePropertyAsync(CompactOverlay, MpvFormat.Flag);
         return instance;
+
+        // 无法预期会出现怎样的错误，这里直接抛出异常.
+        async Task ObservePropertyAsync(string name, MpvFormat format)
+        {
+            var errorCode = MpvError.Success;
+            await Task.Run(() => errorCode = MpvNative.ObserveProperty(instanceHandle, 0, name, format));
+            ThrowIfFailed(errorCode, $"Mpv | observe property {name} failed");
+        }
     }
 
     /// <summary>
@@ -77,12 +88,18 @@ public sealed partial class MpvClient : IAsyncDisposable
     /// </summary>
     /// <param name="level">等级.</param>
     /// <returns><see cref="Task"/>.</returns>
-    public async Task SetLogLevelAsync(MpvLogLevel level)
+    public async Task<Result> SetLogLevelAsync(MpvLogLevel level)
     {
         var errorCode = MpvError.Success;
         _logger.LogInformation($"Set Mpv log level to {level}.");
-        await Task.Run(() => errorCode = MpvNative.RequestLogMessages(_handle, level.ToMpvLogLevelString()));
-        ThrowIfFailed(errorCode, "Mpv | set log level failed");
+        var levelStrResult = level.ToMpvLogLevelString();
+        if (levelStrResult.IsSuccess)
+        {
+            await Task.Run(() => errorCode = MpvNative.RequestLogMessages(_handle, levelStrResult.Value));
+            return WrapAsResult(errorCode, "Mpv | set log level failed");
+        }
+
+        return levelStrResult.ToResult();
     }
 
     /// <summary>
@@ -90,11 +107,11 @@ public sealed partial class MpvClient : IAsyncDisposable
     /// </summary>
     /// <param name="filePath">配置文件地址.</param>
     /// <returns><see cref="Task"/>.</returns>
-    public async Task SetConfigFileAsync(string filePath)
+    public async Task<Result> SetConfigFileAsync(string filePath)
     {
         var errorCode = MpvError.Success;
         await Task.Run(() => errorCode = MpvNative.LoadConfigFile(_handle, filePath));
-        ThrowIfFailed(errorCode, "Mpv | load config file failed");
+        return WrapAsResult(errorCode, "Mpv | load config file failed");
     }
 
     /// <summary>
@@ -102,13 +119,12 @@ public sealed partial class MpvClient : IAsyncDisposable
     /// </summary>
     /// <param name="idleEnable"><c>null</c> 对应 once, <c>true</c> 对应 yes, <c>false</c> 对应 no</param>
     /// <returns><see cref="Task"/>.</returns>
-    public async Task UseIdleAsync(bool? idleEnable)
+    public async Task<Result> UseIdleAsync(bool? idleEnable)
     {
         var state = idleEnable == null ? "once" : idleEnable == true ? "yes" : "no";
         var errorCode = MpvError.Success;
-        _logger.LogInformation($"Set Mpv idle to {state}.");
         await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "idle", state));
-        ThrowIfFailed(errorCode, "Mpv | set idle failed");
+        return WrapAsResult(errorCode, "Mpv | set idle failed");
     }
 
     /// <summary>
@@ -116,13 +132,12 @@ public sealed partial class MpvClient : IAsyncDisposable
     /// </summary>
     /// <param name="isKeepOpen">是否开启</param>
     /// <returns><see cref="Task"/>.</returns>
-    public async Task UseKeepOpenAsync(bool isKeepOpen)
+    public async Task<Result> UseKeepOpenAsync(bool isKeepOpen)
     {
         var errorCode = MpvError.Success;
         var state = isKeepOpen ? "yes" : "no";
-        _logger.LogInformation($"Set Mpv keep open to {state}.");
         await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "keep-open", state));
-        ThrowIfFailed(errorCode, "Mpv | set keep open failed");
+        return WrapAsResult(errorCode, "Mpv | set keep open failed");
     }
 
     /// <summary>
@@ -233,6 +248,16 @@ public sealed partial class MpvClient : IAsyncDisposable
         {
             throw new MpvException(message, errorCode);
         }
+    }
+
+    private static Result WrapAsResult(MpvError errorCode, string message)
+    {
+        if (errorCode == MpvError.Success)
+        {
+            return Result.Ok();
+        }
+
+        return Result.Fail(new Error("Mpv interop failed").CausedBy(new MpvException(message, errorCode)));
     }
 
     /// <inheritdoc/>

@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Richasy. All rights reserved.
 // Licensed under the MIT License.
 
+using FluentResults;
+
 namespace Richasy.MpvKernel.Core;
 
 internal static class InternalUtils
@@ -11,7 +13,7 @@ internal static class InternalUtils
     /// <param name="level">The log level is used to determine the appropriate string output.</param>
     /// <returns>A string that represents the specified log level.</returns>
     /// <exception cref="ArgumentOutOfRangeException">Thrown when the provided log level does not match any defined values.</exception>
-    public static string ToMpvLogLevelString(this MpvLogLevel level)
+    public static Result<string> ToMpvLogLevelString(this MpvLogLevel level)
     {
         return level switch
         {
@@ -23,7 +25,7 @@ internal static class InternalUtils
             MpvLogLevel.V => "v",
             MpvLogLevel.Debug => "debug",
             MpvLogLevel.Trace => "trace",
-            _ => throw new ArgumentOutOfRangeException(nameof(level), level, null),
+            _ => Result.Fail($"The specified log level ({level}) cannot be converted into a corresponding identifier")
         };
     }
 
@@ -33,9 +35,9 @@ internal static class InternalUtils
     /// <param name="level">Accepts a string that represents a log level.</param>
     /// <returns>Returns the corresponding MpvLogLevel based on the input string.</returns>
     /// <exception cref="ArgumentOutOfRangeException">Thrown when the input string does not match any valid log level.</exception>
-    public static MpvLogLevel ToMpvLogLevel(this string level)
+    public static Result<MpvLogLevel> ToMpvLogLevel(this string level)
     {
-        return level switch
+        return level.ToLowerInvariant() switch
         {
             "no" => MpvLogLevel.None,
             "fatal" => MpvLogLevel.Fatal,
@@ -45,7 +47,37 @@ internal static class InternalUtils
             "v" => MpvLogLevel.V,
             "debug" => MpvLogLevel.Debug,
             "trace" => MpvLogLevel.Trace,
-            _ => throw new ArgumentOutOfRangeException(nameof(level), level, null),
+            _ => Result.Fail($"The specified log level ({level}) cannot match the preset level, please limit the value to no | fatal | error | warn | info | v | debug | trace")
         };
+    }
+
+    public static Result OnSuccess(this Result result, Action successAction)
+    {
+        if (result.IsSuccess)
+        {
+            successAction();
+        }
+
+        return result;
+    }
+
+    public static Result OnSuccess(this Result result, Func<Result> successFunc)
+    {
+        if (result.IsSuccess)
+        {
+            return successFunc();
+        }
+
+        return result;
+    }
+
+    public static async Task<Result> OnSuccess(this Result result, Func<Task<Result>> successFunc)
+    {
+        if (result.IsSuccess)
+        {
+            return await successFunc();
+        }
+
+        return result;
     }
 }

@@ -4,6 +4,7 @@
 using Microsoft.Extensions.Logging;
 using Richasy.MpvKernel.Core.Enums;
 using System.Runtime.InteropServices;
+using static Richasy.MpvKernel.Core.Enums.MpvClientProperties;
 
 namespace Richasy.MpvKernel.Core;
 
@@ -47,22 +48,21 @@ public sealed partial class MpvClient
                 _logger.LogInformation($"[MPV] Log message: {logMessage.Level} - {logMessage.Text}");
                 break;
             case MpvEventId.FileLoaded:
-                // 检查如果有额外的音频需要加载，那就在此时加载.
                 ReachFileLoaded?.Invoke(this, EventArgs.Empty);
-                if (!string.IsNullOrEmpty(_cachedSnapshot?.Options?.ExtraAudioUrl))
-                {
-                    var errorCode = MpvError.Success;
-                    await Task.Run(() => errorCode = MpvNative.SetCommandString(_handle, $"audio-add \"{_cachedSnapshot.Options.ExtraAudioUrl}\""));
-                    ThrowIfFailed(errorCode, "Mpv | load extra audio failed");
-                }
-
                 break;
             case MpvEventId.Idle:
             case MpvEventId.Seek:
                 {
-                    var state = await GetPlayerStateAsync();
-                    SendNotify(MpvClientEventId.StateChanged, state);
+                    var stateResult = await GetPlayerStateAsync();
+                    if(stateResult.IsFailed)
+                    {
+                        _logger.LogError($"[MPV] Failed to get player state: {stateResult.Errors}");
+                        return;
+                    }
+
+                    SendNotify(MpvClientEventId.StateChanged, stateResult.Value);
                 }
+
                 break;
             case MpvEventId.PropertyChange:
                 var eventProp = Marshal.PtrToStructure<MpvEventProperty>(@event.DataPtr);
@@ -81,37 +81,43 @@ public sealed partial class MpvClient
             return;
         }
 
-        if (eventProp.Name == "pause" || eventProp.Name == "core-idle")
+        if (eventProp.Name == Pause || eventProp.Name == CoreIdle || eventProp.Name == Seeking)
         {
-            var state = await GetPlayerStateAsync();
-            SendNotify(MpvClientEventId.StateChanged, state);
+            var stateResult = await GetPlayerStateAsync();
+            if (stateResult.IsFailed)
+            {
+                _logger.LogError($"[MPV] Failed to get player state: {stateResult.Errors}");
+                return;
+            }
+
+            SendNotify(MpvClientEventId.StateChanged, stateResult.Value);
         }
-        else if (eventProp.Name == "volume")
+        else if (eventProp.Name == Volume)
         {
             var volume = Marshal.PtrToStructure<double>(eventProp.DataPtr);
             SendNotify(MpvClientEventId.VolumeChanged, volume);
         }
-        else if (eventProp.Name == "duration")
+        else if (eventProp.Name == Duration)
         {
             var duration = Marshal.PtrToStructure<double>(eventProp.DataPtr);
             SendNotify(MpvClientEventId.DurationChanged, duration);
         }
-        else if (eventProp.Name == "time-pos")
+        else if (eventProp.Name == TimePosition)
         {
             var position = Marshal.PtrToStructure<double>(eventProp.DataPtr);
             SendNotify(MpvClientEventId.PositionChanged, position);
         }
-        else if (eventProp.Name == "fullscreen")
+        else if (eventProp.Name == FullScreen)
         {
             var isFullScreen = Marshal.PtrToStructure<MpvNode>(eventProp.DataPtr);
             SendNotify(MpvClientEventId.FullScreenChanged, isFullScreen.Flag != 0);
         }
-        else if (eventProp.Name == "ontop")
+        else if (eventProp.Name == CompactOverlay)
         {
             var isOnTop = Marshal.PtrToStructure<MpvNode>(eventProp.DataPtr);
             SendNotify(MpvClientEventId.CompactOverlayChanged, isOnTop.Flag != 0);
         }
-        else if (eventProp.Name == "speed")
+        else if (eventProp.Name == Speed)
         {
             var speed = Marshal.PtrToStructure<double>(eventProp.DataPtr);
             SendNotify(MpvClientEventId.SpeedChanged, speed);
