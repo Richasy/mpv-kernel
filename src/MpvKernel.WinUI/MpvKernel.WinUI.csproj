@@ -46,5 +46,8 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Controls\PlayerInteractivePanel\" />
+  </ItemGroup>
   
 </Project>

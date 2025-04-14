@@ -3,6 +3,7 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
+    <PackageVersion Include="CommunityToolkit.WinUI.Controls.Segmented" Version="8.2.250402" />
     <PackageVersion Include="FluentIcons.WinUI" Version="1.1.292" />
     <PackageVersion Include="FluentResults" Version="3.16.0" />
     <PackageVersion Include="Microsoft.Bcl.HashCode" Version="1.1.1" />
@@ -17,13 +18,17 @@
     <PackageVersion Include="Microsoft.Web.WebView2" Version="1.0.3065.39" />
     <PackageVersion Include="Microsoft.Windows.CsWin32" Version="0.3.183" />
     <PackageVersion Include="Microsoft.Windows.CsWinRT" Version="2.2.0" />
-    <PackageVersion Include="Richasy.WinUIKernel.Share" Version="0.0.7-preview5" />
+    <PackageVersion Include="Richasy.WinUIKernel.Share" Version="0.0.7-preview6" />
     <PackageVersion Include="RichasyKernel.Abstractions" Version="0.0.1" />
+    <PackageVersion Include="RichasyKernel.Core" Version="0.0.1" />
+    <PackageVersion Include="Serilog" Version="4.2.1-dev-02352" />
+    <PackageVersion Include="Serilog.Extensions.Logging" Version="9.0.1" />
+    <PackageVersion Include="Serilog.Sinks.File" Version="7.0.0-dev-02301" />
     <PackageVersion Include="StyleCop.Analyzers" Version="1.1.118" />
     <PackageVersion Include="Microsoft.Bcl.TimeProvider" Version="8.0.1" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1742" />
-    <PackageVersion Include="Microsoft.WindowsAppSDK" Version="1.7.250310001" />
+    <PackageVersion Include="Microsoft.WindowsAppSDK" Version="1.7.250401001" />
     <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="8.0.1" />
     <PackageVersion Include="System.Drawing.Common" Version="9.0.2" />
     <PackageVersion Include="System.Linq.Async" Version="6.0.1" />

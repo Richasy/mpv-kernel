@@ -8,6 +8,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Hosting;
 using Richasy.MpvKernel.Core;
+using Richasy.MpvKernel.WinUI.Controls;
 
 namespace Richasy.MpvKernel.WinUI;
 

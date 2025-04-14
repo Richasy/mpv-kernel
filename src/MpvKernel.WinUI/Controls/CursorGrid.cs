@@ -4,7 +4,7 @@
 using Microsoft.UI.Input;
 using Microsoft.UI.Xaml.Controls;
 
-namespace Richasy.MpvKernel.WinUI;
+namespace Richasy.MpvKernel.WinUI.Controls;
 
 /// <summary>
 /// 光标网格.

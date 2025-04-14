@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<local:LocalVideoPageBase
+    x:Class="WinUISample.Pages.LocalVideoPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:base="using:Richasy.WinUIKernel.Share.Base"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:ic="using:FluentIcons.WinUI"
+    xmlns:local="using:WinUISample.Pages"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid>
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+            <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                <Button
+                    MinWidth="120"
+                    VerticalAlignment="Center"
+                    Command="{x:Bind ViewModel.OpenLocalFileCommand}"
+                    Content="打开文件" />
+                <Button
+                    Margin="12,0,0,0"
+                    VerticalAlignment="Center"
+                    Command="{x:Bind ViewModel.ReopenLastFileCommand}"
+                    Style="{StaticResource SmallIconButtonStyle}"
+                    ToolTipService.ToolTip="重新打开上一次的视频"
+                    Visibility="{x:Bind ViewModel.LastVideoPath, Mode=OneWay, Converter={StaticResource ObjectToVisibilityConverter}}">
+                    <ic:SymbolIcon FontSize="14" Symbol="ArrowRedo" />
+                </Button>
+            </StackPanel>
+            <base:TrimTextBlock
+                Margin="12,8"
+                FontSize="12"
+                Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                MaxLines="1"
+                Text="{x:Bind ViewModel.LastVideoPath, Mode=OneWay}"
+                Visibility="{x:Bind ViewModel.LastVideoPath, Mode=OneWay, Converter={StaticResource ObjectToVisibilityConverter}}" />
+        </StackPanel>
+    </Grid>
+</local:LocalVideoPageBase>
