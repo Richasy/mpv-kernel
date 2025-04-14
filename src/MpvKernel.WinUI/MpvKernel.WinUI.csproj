@@ -26,12 +26,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Controls\MpvTransportControls\MpvTransportControls.xaml" />
     <None Remove="PlayerInteractivePanel.xaml" />
     <None Remove="Themes\Generic.xaml" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" />
     <PackageReference Include="Microsoft.WindowsAppSDK" />
+    <PackageReference Include="Richasy.WinUIKernel.Share" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MpvKernel.Core\MpvKernel.Core.csproj" />
@@ -48,6 +50,11 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Controls\PlayerInteractivePanel\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Controls\MpvTransportControls\MpvTransportControls.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   
 </Project>

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="ms-appx:///Richasy.MpvKernel.WinUI/PlayerInteractivePanel.xaml" />
+        <ResourceDictionary Source="ms-appx:///Richasy.MpvKernel.WinUI/Controls/PlayerInteractivePanel/PlayerInteractivePanel.xaml" />
+        <ResourceDictionary Source="ms-appx:///Richasy.MpvKernel.WinUI/Controls/MpvTransportControls/MpvTransportControls.xaml" />
     </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>
