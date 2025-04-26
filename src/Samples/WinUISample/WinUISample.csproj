@@ -13,6 +13,7 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="Controls\PlayerOverlay.xaml" />
     <None Remove="Controls\RootLayout.xaml" />
     <None Remove="Pages\LocalVideoPage.xaml" />
   </ItemGroup>
@@ -56,6 +57,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MpvKernel.WinUI\MpvKernel.WinUI.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Controls\PlayerOverlay.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Controls\RootLayout.xaml">

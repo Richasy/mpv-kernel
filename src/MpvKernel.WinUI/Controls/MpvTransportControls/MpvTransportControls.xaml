@@ -177,12 +177,13 @@
 
     <Style x:Key="DefaultMpvTransportControlsStyle" TargetType="local:MpvTransportControls">
         <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="VerticalAlignment" Value="Bottom" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="local:MpvTransportControls">
-                    <Grid>
+                    <Grid Background="{TemplateBinding Background}">
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
+                            <RowDefinition />
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
                         <Grid Padding="{StaticResource MpvTransportControlContainerPadding}">
@@ -412,6 +413,54 @@
                                 Foreground="{ThemeResource TextFillColorTertiaryBrush}"
                                 Style="{StaticResource CaptionTextBlockStyle}" />
                         </Grid>
+
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup>
+                                <VisualState x:Name="WideState">
+                                    <VisualState.StateTriggers>
+                                        <AdaptiveTrigger MinWindowWidth="1000" />
+                                    </VisualState.StateTriggers>
+                                </VisualState>
+                                <VisualState x:Name="BelowWideState">
+                                    <VisualState.StateTriggers>
+                                        <AdaptiveTrigger MinWindowWidth="700" />
+                                    </VisualState.StateTriggers>
+                                    <VisualState.Setters>
+                                        <Setter Target="FullVolumeContainer.Visibility" Value="Collapsed" />
+                                        <Setter Target="SlimVolumeButton.Visibility" Value="Visible" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="MediumState">
+                                    <VisualState.StateTriggers>
+                                        <AdaptiveTrigger MinWindowWidth="500" />
+                                    </VisualState.StateTriggers>
+                                    <VisualState.Setters>
+                                        <Setter Target="FullVolumeContainer.Visibility" Value="Collapsed" />
+                                        <Setter Target="SlimVolumeButton.Visibility" Value="Visible" />
+                                        <Setter Target="BackwardButton.Visibility" Value="Collapsed" />
+                                        <Setter Target="ForwardButton.Visibility" Value="Collapsed" />
+                                        <Setter Target="PrevButton.Visibility" Value="Collapsed" />
+                                        <Setter Target="NextButton.Visibility" Value="Collapsed" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="NarrowState">
+                                    <VisualState.StateTriggers>
+                                        <AdaptiveTrigger MinWindowWidth="0" />
+                                    </VisualState.StateTriggers>
+                                    <VisualState.Setters>
+                                        <Setter Target="FullVolumeContainer.Visibility" Value="Collapsed" />
+                                        <Setter Target="SlimVolumeButton.Visibility" Value="Visible" />
+                                        <Setter Target="BackwardButton.Visibility" Value="Collapsed" />
+                                        <Setter Target="ForwardButton.Visibility" Value="Visible" />
+                                        <Setter Target="PrevButton.Visibility" Value="Collapsed" />
+                                        <Setter Target="NextButton.Visibility" Value="Visible" />
+                                        <Setter Target="LeftPresenter.Visibility" Value="Collapsed" />
+                                        <Setter Target="LeftColumn.Width" Value="Auto" />
+                                        <Setter Target="RootGrid.Height" Value="120" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>

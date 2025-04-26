@@ -127,6 +127,13 @@ public sealed partial class MpvPlayerWindow : IAsyncDisposable
     }
 
     /// <summary>
+    /// 设置主题.
+    /// </summary>
+    /// <param name="theme">元素主题.</param>
+    public void SetTheme(ElementTheme theme)
+        => _rootGrid.RequestedTheme = theme;
+
+    /// <summary>
     /// 获取窗口对象.
     /// </summary>
     /// <returns><see cref="AppWindow"/>.</returns>
