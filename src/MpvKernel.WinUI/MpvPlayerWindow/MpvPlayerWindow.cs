@@ -82,7 +82,6 @@ public sealed partial class MpvPlayerWindow : IAsyncDisposable
     /// <summary>
     /// 设置底部 UI 元素.
     /// </summary>
-    /// <param name="element"></param>
     public void SetBackgroundElement(UIElement element)
     {
         if (_rootGrid.Children.Any(p => p is Grid { Name: "bkg" }))

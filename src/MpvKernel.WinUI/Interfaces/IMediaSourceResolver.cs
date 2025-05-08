@@ -33,21 +33,4 @@ public interface IMediaSourceResolver
     /// </summary>
     /// <returns>标题.</returns>
     public string GetTitle();
-
-    /// <summary>
-    /// 处理数据通知.
-    /// </summary>
-    /// <param name="id">事件 ID.</param>
-    /// <param name="data">数据.</param>
-    public void HandleDataNotify(MpvClientEventId id, object data);
-
-    /// <summary>
-    /// 因内部的一些操作需要重新加载播放数据时触发.
-    /// </summary>
-    public event EventHandler RequestReload;
-
-    /// <summary>
-    /// 因内部的一些操作需要清除播放数据时触发.
-    /// </summary>
-    public event EventHandler RequestClear;
 }
