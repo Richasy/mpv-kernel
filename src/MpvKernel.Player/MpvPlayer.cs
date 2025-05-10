@@ -27,10 +27,11 @@ public sealed partial class MpvPlayer : ObservableObject, IAsyncDisposable
         _sourceResolver = sourceResolver;
         _subtitleResolver = subtitleResolver;
         _logger = logger ?? NullLogger.Instance;
+        _uiContext = SynchronizationContext.Current ?? throw new InvalidOperationException("Must be created on UI thread.");
 
         // 内部维护一个定时器用于刷新播放器状态.
-        _statusTimer = new Timer(OnStatusTimerCallbackAsync, default, Timeout.Infinite, 5000);
-
+        _statusTimer = new System.Timers.Timer(5000);
+        _statusTimer.Elapsed += OnStatusTimerElapsedAsync;
         PlaybackState = MpvPlayerState.Idle;
         Client.DataNotify += OnDataNotify;
         Client.ReachFileLoading += OnFileLoading;
@@ -60,6 +61,7 @@ public sealed partial class MpvPlayer : ObservableObject, IAsyncDisposable
             throw;
         }
 
+        _statusTimer.Start();
         if (alsoPlay)
         {
             CheckStateProperties();
@@ -81,50 +83,71 @@ public sealed partial class MpvPlayer : ObservableObject, IAsyncDisposable
         var state = await Client.GetPlayerStateAsync();
         if (state.IsSuccess)
         {
-            PlaybackState = state.Value;
+            _uiContext.Post(_ => PlaybackState = state.Value, null);
         }
 
         var duration = await Client.GetDurationAsync();
         if (duration.IsSuccess)
         {
-            Duration = duration.Value;
+            _uiContext.Post(_ => Duration = duration.Value, null);
         }
 
         var position = await Client.GetCurrentPositionAsync();
         if (position.IsSuccess)
         {
-            Position = position.Value;
+            _uiContext.Post(_ => Position = position.Value, null);
         }
 
         var volume = await Client.GetVolumeAsync();
         if (volume.IsSuccess)
         {
-            Volume = volume.Value;
+            _uiContext.Post(_ => Volume = volume.Value, null);
         }
 
         var rate = await Client.GetSpeedAsync();
         if (rate.IsSuccess)
         {
-            PlaybackRate = rate.Value;
+            _uiContext.Post(_ => PlaybackRate = rate.Value, null);
         }
 
         var isFullScreen = await Client.GetFullScreenStateAsync();
         if (isFullScreen.IsSuccess)
         {
-            IsFullScreen = isFullScreen.Value;
+            _uiContext.Post(_ => IsFullScreen = isFullScreen.Value, null);
         }
 
         var isCompactOverlay = await Client.GetCompactOverlayStateAsync();
         if (isCompactOverlay.IsSuccess)
         {
-            IsCompactOverlay = isCompactOverlay.Value;
+            _uiContext.Post(_ => IsCompactOverlay = isCompactOverlay.Value, null);
         }
+    }
+
+    /// <summary>
+    /// 重新播放当前媒体.
+    /// </summary>
+    /// <returns><see cref="Task"/>.</returns>
+    public async Task ReplayAsync()
+    {
+        try
+        {
+            _cachedSource = await _sourceResolver.GetSourceAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get media source.");
+            throw;
+        }
+
+        await Client.PlayAsync(_cachedSource.Url, _cachedSource.Options);
     }
 
     /// <inheritdoc/>
     public async ValueTask DisposeAsync()
     {
-        await _statusTimer.DisposeAsync();
+        _statusTimer.Elapsed -= OnStatusTimerElapsedAsync;
+        _statusTimer.Stop();
+        _statusTimer.Dispose();
         await Client.DisposeAsync();
     }
 

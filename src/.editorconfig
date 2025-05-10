@@ -454,6 +454,9 @@ dotnet_diagnostic.CA1848.severity = none
 # CA2254: 模板应为静态表达式
 dotnet_diagnostic.CA2254.severity = none
 
+# VSTHRD001: Avoid legacy thread switching APIs
+dotnet_diagnostic.VSTHRD001.severity = none
+
 [*.{cs,vb}]
 dotnet_style_qualification_for_field = false:silent
 dotnet_style_qualification_for_property = false:silent

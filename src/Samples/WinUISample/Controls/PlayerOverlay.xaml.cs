@@ -1,17 +1,26 @@
-ï»¿// Copyright (c) Richasy. All rights reserved.
+// Copyright (c) Richasy. All rights reserved.
 // Licensed under the MIT License.
 
-using Microsoft.UI.Xaml.Controls;
+using Richasy.WinUIKernel.Share.Base;
+using WinUISample.ViewModels;
 
 namespace WinUISample.Controls;
 
 /// <summary>
-/// æ’­æ”¾å™¨è¦†ç›–å±‚.
+/// ²¥·ÅÆ÷¿ØÖÆ»ùÀà.
 /// </summary>
-public sealed partial class PlayerOverlay : UserControl
+public abstract class PlayerControlBase : LayoutUserControlBase<PlayerViewModel>;
+
+/// <summary>
+/// ²¥·ÅÆ÷µþ¼Ó²ã.
+/// </summary>
+public sealed partial class PlayerOverlay : PlayerControlBase
 {
-    public PlayerOverlay()
-    {
-        this.InitializeComponent();
-    }
+    /// <summary>
+    /// ³õÊ¼»¯ <see cref="PlayerOverlay"/> ÀàµÄÐÂÊµÀý.
+    /// </summary>
+    public PlayerOverlay() => InitializeComponent();
+
+    private async void OnProgressSliderValueChanged(object sender, Microsoft.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs e)
+        => await ViewModel.ChangePositionAsync(e.NewValue);
 }

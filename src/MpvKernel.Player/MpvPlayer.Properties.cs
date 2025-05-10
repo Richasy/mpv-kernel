@@ -14,7 +14,8 @@ public sealed partial class MpvPlayer
     private readonly IMpvMediaSourceResolver? _sourceResolver;
     private readonly IMpvMediaSubtitleResolver? _subtitleResolver;
     private readonly ILogger _logger;
-    private readonly Timer _statusTimer;
+    private readonly SynchronizationContext _uiContext;
+    private readonly System.Timers.Timer _statusTimer;
 
     private MpvMediaSource? _cachedSource;
 

@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Richasy. All rights reserved.
 // Licensed under the MIT License.
 
-using Richasy.MpvKernel.Core.Enums;
 using Richasy.MpvKernel.Core.Models;
 
 namespace Richasy.MpvKernel.WinUI;

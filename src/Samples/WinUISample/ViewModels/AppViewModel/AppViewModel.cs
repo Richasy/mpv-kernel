@@ -5,7 +5,6 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
 using Richasy.MpvKernel;
 using Richasy.MpvKernel.Core;
-using Richasy.MpvKernel.Core.Models;
 using Richasy.MpvKernel.WinUI;
 using Richasy.WinUIKernel.Share.Toolkits;
 using Richasy.WinUIKernel.Share.ViewModels;
@@ -39,18 +38,11 @@ public sealed partial class AppViewModel : ViewModelBase
     /// <summary>
     /// 打开视频.
     /// </summary>
-    public async Task OpenVideoAsync(string videoPath, MpvPlayOptions? options = null)
+    public async Task OpenVideoAsync(string videoPath)
     {
-        var existWindow = PlayerWindows.Find(p => p.Id == videoPath);
-        if (existWindow != null)
-        {
-            existWindow.Window!.Show();
-            return;
-        }
-
         var playerVM = this.Get<PlayerViewModel>();
-        PlayerWindows.Add(playerVM);
-        await playerVM.LoadAsync(videoPath, options);
+        await playerVM.InitializeAsync(videoPath);
+        Players.Add(playerVM);
     }
 
     [RelayCommand]

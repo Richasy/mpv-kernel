@@ -49,7 +49,7 @@
     <Folder Include="Controls\PlayerInteractivePanel\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MpvKernel.Controller\MpvKernel.Player.csproj" />
+    <ProjectReference Include="..\MpvKernel.Player\MpvKernel.Player.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Page Update="Controls\MpvTransportControls\MpvTransportControls.xaml">

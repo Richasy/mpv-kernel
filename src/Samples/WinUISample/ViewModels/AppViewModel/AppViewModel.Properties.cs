@@ -31,12 +31,12 @@ public sealed partial class AppViewModel
     public partial string LibMpvPath { get; set; }
 
     /// <summary>
-    /// 播放器窗口列表.
-    /// </summary>
-    public List<PlayerViewModel> PlayerWindows { get; set; } = [];
-
-    /// <summary>
     /// 主窗口.
     /// </summary>
     public MainWindow MainWindow { get; set; }
+
+    /// <summary>
+    /// 播放器列表.
+    /// </summary>
+    public List<PlayerViewModel> Players { get; } = [];
 }
