@@ -21,8 +21,6 @@ public sealed partial class MpvClient
             filePath = filePath.Replace("\\", "/");
         }
 
-        _cachedDuration = default;
-        _cachedSnapshot = new(filePath, options);
         var errorCode = MpvError.Success;
         List<string> commandArgs = ["loadfile", $"\"{filePath}\"", "replace", "0"];
         List<string> commandOptions = [];
@@ -114,35 +112,6 @@ public sealed partial class MpvClient
         var node = new MpvNode(false);
         await Task.Run(() => errorCode = MpvNative.SetProperty(_handle, Pause, MpvFormat.Flag, ref node));
         return WrapAsResult(errorCode, "Mpv | set pause failed");
-    }
-
-    /// <summary>
-    /// 重新播放当前文件.
-    /// </summary>
-    /// <returns><see cref="Task"/>.</returns>
-    public async Task<Result> ReplayAsync(double startPos = 0d)
-    {
-        if (_cachedSnapshot == null)
-        {
-            return Result.Fail("Replay failed, please play a file first.");
-        }
-
-        if (startPos > 0)
-        {
-            _cachedSnapshot.Options ??= new MpvPlayOptions();
-            _cachedSnapshot.Options.StartPosition = startPos;
-        }
-
-        try
-        {
-            await PlayAsync(_cachedSnapshot.FilePath!, _cachedSnapshot.Options);
-        }
-        catch (Exception ex)
-        {
-            return Result.Fail(new Error("Replay failed").CausedBy(ex));
-        }
-
-        return Result.Ok();
     }
 
     /// <summary>
@@ -273,21 +242,16 @@ public sealed partial class MpvClient
     /// <returns>时长（秒）</returns>
     public async Task<Result<double>> GetDurationAsync()
     {
-        if (_cachedDuration == null)
+        var errorCode = MpvError.Success;
+        var result = new MpvNode();
+        await Task.Run(() => errorCode = MpvNative.GetProperty(_handle, Duration, MpvFormat.Double, out result));
+        var durationResult = WrapAsResult(errorCode, "Mpv | get duration failed");
+        if (durationResult.IsFailed)
         {
-            var errorCode = MpvError.Success;
-            var result = new MpvNode();
-            await Task.Run(() => errorCode = MpvNative.GetProperty(_handle, Duration, MpvFormat.Double, out result));
-            var durationResult = WrapAsResult(errorCode, "Mpv | get duration failed");
-            if (durationResult.IsFailed)
-            {
-                return durationResult;
-            }
-
-            _cachedDuration = result.DoubleValue;
+            return durationResult;
         }
 
-        return _cachedDuration.Value;
+        return result.DoubleValue;
     }
 
     /// <summary>

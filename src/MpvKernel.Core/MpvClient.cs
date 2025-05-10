@@ -20,8 +20,6 @@ public sealed partial class MpvClient : IAsyncDisposable
     private readonly MpvInteropHandle _handle;
     private Task? _eventLoopTask;
     private CancellationTokenSource? _eventCts;
-    private double? _cachedDuration;
-    private MpvPlayerSnapshot? _cachedSnapshot;
 
     /// <summary>
     /// Initialize a new instance of the <see cref="MpvClient"/> class.
@@ -55,11 +53,13 @@ public sealed partial class MpvClient : IAsyncDisposable
     /// <summary>
     /// 创建一个新的 MPV 实例.
     /// </summary>
+    /// <param name="dllPath">libmpv2.dll 的路径.</param>
     /// <param name="options">初始化选项.</param>
     /// <param name="logger">日志记录.</param>
     /// <returns><see cref="MpvClient"/>.</returns>
-    public static async Task<MpvClient> CreateAsync(MpvInitializeOptions? options = null, ILogger? logger = null)
+    public static async Task<MpvClient> CreateAsync(string dllPath, MpvInitializeOptions? options = null, ILogger? logger = null)
     {
+        MpvNative.Initialize(dllPath);
         var instanceHandle = MpvNative.Create();
         var instance = new MpvClient(instanceHandle, logger);
         await instance.InitializeAsync(options).ConfigureAwait(false);

@@ -1,14 +1,15 @@
 ﻿// Copyright (c) Richasy. All rights reserved.
 // Licensed under the MIT License.
 
+using CliSample;
 using Microsoft.Extensions.Logging;
 using Richasy.MpvKernel;
 using Richasy.MpvKernel.Core;
+using Richasy.MpvKernel.Player;
 
 using var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
 var logger = loggerFactory.CreateLogger<Program>();
-MpvNative.Initialize(@"C:\Users\zrich\Desktop\libmpv-2.dll");
-var client = await MpvClient.CreateAsync(logger: logger);
+var client = await MpvClient.CreateAsync(@"C:\Users\zrich\Desktop\libmpv-2.dll", logger: logger);
 client.ReachFileLoading += async(s, _) =>
 {
     Console.WriteLine("[MPV] Reach file loading.");
@@ -28,18 +29,15 @@ client.ReachFileLoaded += async (s, _) =>
     var state = await client.GetPlayerStateAsync();
     Console.WriteLine($"State: {state}");
     var duration = await client.GetDurationAsync();
-    Console.WriteLine($"Duration: {Math.Round(duration,2)}s");
+    Console.WriteLine($"Duration: {Math.Round(duration.Value,2)}s");
 };
 
 await client.SetLogLevelAsync(MpvLogLevel.Warn);
-await client.UseIdleAsync(true);
-var state = await client.GetPlayerStateAsync();
-Console.WriteLine($"State: {state}");
-
-await client.PlayAsync("https://www.tootootool.com/wp-content/uploads/2020/11/big_buck_bunny_720p_1mb.mp4");
-await Task.Delay(5000);
-var pos = await client.GetCurrentPositionAsync();
-Console.WriteLine($"Position: {Math.Round(pos, 2)}s");
-state = await client.GetPlayerStateAsync();
-Console.WriteLine($"State: {state}");
+await client.UseIdleAsync(default);
+await client.UseKeepOpenAsync(true);
+var player = new MpvPlayer(client, new WebSourceResolver());
+await player.InitializeAsync();
+await Task.Delay(4000);
+Console.WriteLine($"Position: {Math.Round(player.Position, 2)}s");
+Console.WriteLine($"State: {player.PlaybackState}");
 Console.ReadKey();

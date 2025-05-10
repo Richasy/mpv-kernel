@@ -36,9 +36,6 @@
     <PackageReference Include="Richasy.WinUIKernel.Share" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MpvKernel.Core\MpvKernel.Core.csproj" />
-  </ItemGroup>
-  <ItemGroup>
     <Page Update="PlayerInteractivePanel.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -50,6 +47,9 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Controls\PlayerInteractivePanel\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MpvKernel.Controller\MpvKernel.Player.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Page Update="Controls\MpvTransportControls\MpvTransportControls.xaml">

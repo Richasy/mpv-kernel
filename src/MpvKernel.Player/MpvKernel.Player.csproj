@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  
+  <PropertyGroup>
+  	<AssemblyName>Richasy.MpvKernel.Player</AssemblyName>
+  	<RootNamespace>$(AssemblyName)</RootNamespace>
+  	<TargetFramework>net9.0</TargetFramework>
+  	<ImplicitUsings>enable</ImplicitUsings>
+  	<Nullable>enable</Nullable>
+  	<IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+  
+  <Import Project="$(RepoRoot)/src/nuget-package.props" />
+  
+  <PropertyGroup>
+  	<!-- NuGet Package Settings -->
+  	<Title>Mpv Kernel - Player</Title>
+  	<Description>Mpv player.</Description>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\MpvKernel.Core\MpvKernel.Core.csproj" />
+  </ItemGroup>
+</Project>

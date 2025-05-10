@@ -14,6 +14,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinUISample", "src\Samples\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MpvKernel.WinUI", "src\MpvKernel.WinUI\MpvKernel.WinUI.csproj", "{480E4323-9183-431B-A255-A044AE4F079D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MpvKernel.Player", "src\MpvKernel.Player\MpvKernel.Player.csproj", "{7271C9C7-D816-4238-8E24-1A9EB7C55AE0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -66,6 +68,14 @@ Global
 		{480E4323-9183-431B-A255-A044AE4F079D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{480E4323-9183-431B-A255-A044AE4F079D}.Release|x64.ActiveCfg = Release|Any CPU
 		{480E4323-9183-431B-A255-A044AE4F079D}.Release|x64.Build.0 = Release|Any CPU
+		{7271C9C7-D816-4238-8E24-1A9EB7C55AE0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7271C9C7-D816-4238-8E24-1A9EB7C55AE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7271C9C7-D816-4238-8E24-1A9EB7C55AE0}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{7271C9C7-D816-4238-8E24-1A9EB7C55AE0}.Debug|x64.Build.0 = Debug|Any CPU
+		{7271C9C7-D816-4238-8E24-1A9EB7C55AE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7271C9C7-D816-4238-8E24-1A9EB7C55AE0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7271C9C7-D816-4238-8E24-1A9EB7C55AE0}.Release|x64.ActiveCfg = Release|Any CPU
+		{7271C9C7-D816-4238-8E24-1A9EB7C55AE0}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

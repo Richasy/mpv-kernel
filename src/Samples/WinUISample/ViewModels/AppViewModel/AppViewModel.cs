@@ -61,7 +61,6 @@ public sealed partial class AppViewModel : ViewModelBase
         {
             LibMpvPath = file.Path;
             _settingsToolkit.WriteLocalSetting("LibMpvPath", file.Path);
-            MpvNative.Initialize(file.Path);
         }
     }
 
@@ -75,7 +74,8 @@ public sealed partial class AppViewModel : ViewModelBase
 
     private async Task OpenPlayerWindowAsync()
     {
-        var client = await MpvClient.CreateAsync();
+        var mpvPath = _settingsToolkit.ReadLocalSetting("LibMpvPath", string.Empty);
+        var client = await MpvClient.CreateAsync(mpvPath);
         await client.SetLogLevelAsync(MpvLogLevel.Info);
         await client.UseIdleAsync(true);
         var playerWindow = new MpvPlayerWindow(client, this.Get<DispatcherQueue>());
