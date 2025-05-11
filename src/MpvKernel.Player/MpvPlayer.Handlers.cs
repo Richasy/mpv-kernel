@@ -71,8 +71,11 @@ public sealed partial class MpvPlayer
         }
     }
 
-    private void OnFileLoaded(object? sender, EventArgs e)
-        => _uiContext.Post(_ => IsLoading = false, default);
+    private async void OnFileLoaded(object? sender, EventArgs e)
+    {
+        _uiContext.Post(_ => IsLoading = false, default);
+        await RefreshStatusAsync();
+    }
 
     private void OnFileLoading(object? sender, EventArgs e)
         => _uiContext.Post(_ => IsLoading = true, default);

@@ -13,18 +13,16 @@
         <ResourceDictionary>
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Light">
-                    <AcrylicBrush
+                    <SolidColorBrush
                         x:Key="MtcBackgroundBrush"
-                        FallbackColor="White"
-                        TintColor="White"
-                        TintOpacity="0.6" />
+                        Opacity="0.6"
+                        Color="White" />
                 </ResourceDictionary>
                 <ResourceDictionary x:Key="Dark">
-                    <AcrylicBrush
+                    <SolidColorBrush
                         x:Key="MtcBackgroundBrush"
-                        FallbackColor="Black"
-                        TintColor="Black"
-                        TintOpacity="0.6" />
+                        Opacity="0.8"
+                        Color="#2C2C2C" />
                 </ResourceDictionary>
                 <ResourceDictionary x:Key="HighContrast">
                     <SolidColorBrush
@@ -38,35 +36,30 @@
 
     <Grid>
         <Grid
-            MaxWidth="1200"
+            MaxWidth="800"
             Margin="12"
-            Padding="12,8"
+            Padding="16,12,16,8"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Bottom"
             Background="{ThemeResource MtcBackgroundBrush}"
-            CornerRadius="{StaticResource OverlayCornerRadius}">
+            CornerRadius="{StaticResource OverlayCornerRadius}"
+            RowSpacing="4">
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             <Grid ColumnSpacing="12">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="60" />
+                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition />
-                    <ColumnDefinition Width="60" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <TextBlock
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
                     Style="{StaticResource CaptionTextBlockStyle}"
                     Text="{x:Bind ViewModel.PositionText, Mode=OneWay}" />
-                <Slider
-                    x:Name="ProgressSlider"
-                    Grid.Column="1"
-                    HorizontalAlignment="Stretch"
-                    Maximum="{x:Bind ViewModel.Player.Duration, Mode=OneWay}"
-                    ValueChanged="OnProgressSliderValueChanged"
-                    Value="{x:Bind ViewModel.Player.Position, Mode=OneWay}" />
                 <TextBlock
                     Grid.Column="2"
                     HorizontalAlignment="Left"
@@ -74,25 +67,108 @@
                     Style="{StaticResource CaptionTextBlockStyle}"
                     Text="{x:Bind ViewModel.DurationText, Mode=OneWay}" />
             </Grid>
-            <StackPanel Grid.Row="1" Orientation="Horizontal">
-                <Button
-                    Command="{x:Bind ViewModel.PlayPauseCommand, Mode=OneWay}"
-                    Style="{StaticResource IconButtonStyle}"
-                    ToolTipService.ToolTip="播放/暂停">
-                    <Grid>
-                        <ic:SymbolIcon
-                            FontSize="14"
-                            IconVariant="Filled"
-                            Symbol="Play"
-                            Visibility="{x:Bind ViewModel.Player.IsPlaying, Mode=OneWay, Converter={StaticResource BoolToVisibilityReverseConverter}}" />
-                        <ic:SymbolIcon
-                            FontSize="14"
-                            IconVariant="Filled"
-                            Symbol="Pause"
-                            Visibility="{x:Bind ViewModel.Player.IsPlaying, Mode=OneWay}" />
-                    </Grid>
-                </Button>
-            </StackPanel>
+            <Slider
+                x:Name="ProgressSlider"
+                Grid.Row="1"
+                Margin="0,-6,0,0"
+                HorizontalAlignment="Stretch"
+                Maximum="{x:Bind ViewModel.Player.Duration, Mode=OneWay}"
+                ValueChanged="OnProgressSliderValueChanged"
+                Value="{x:Bind ViewModel.Player.Position, Mode=OneWay}" />
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <StackPanel
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal"
+                    Spacing="8">
+                    <ic:SymbolIcon
+                        VerticalAlignment="Center"
+                        FontSize="14"
+                        IconVariant="Filled"
+                        Symbol="Speaker2" />
+                    <Slider
+                        Width="80"
+                        VerticalAlignment="Center"
+                        Maximum="100"
+                        ValueChanged="OnVolumeValueChanged"
+                        Value="{x:Bind ViewModel.Player.Volume, Mode=OneWay}" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button
+                        Command="{x:Bind ViewModel.SkipBackward10Command, Mode=OneWay}"
+                        Style="{StaticResource IconButtonStyle}"
+                        ToolTipService.ToolTip="回调10秒">
+                        <ic:SymbolIcon FontSize="14" Symbol="SkipBack10" />
+                    </Button>
+                    <Button
+                        Command="{x:Bind ViewModel.PlayPauseCommand, Mode=OneWay}"
+                        Style="{StaticResource IconButtonStyle}"
+                        ToolTipService.ToolTip="播放/暂停">
+                        <Grid>
+                            <ic:SymbolIcon
+                                FontSize="14"
+                                IconVariant="Filled"
+                                Symbol="Play"
+                                Visibility="{x:Bind ViewModel.Player.IsPlaying, Mode=OneWay, Converter={StaticResource BoolToVisibilityReverseConverter}}" />
+                            <ic:SymbolIcon
+                                FontSize="14"
+                                IconVariant="Filled"
+                                Symbol="Pause"
+                                Visibility="{x:Bind ViewModel.Player.IsPlaying, Mode=OneWay}" />
+                        </Grid>
+                    </Button>
+                    <Button
+                        Command="{x:Bind ViewModel.SkipForward30Command}"
+                        Style="{StaticResource IconButtonStyle}"
+                        ToolTipService.ToolTip="快进30秒">
+                        <ic:SymbolIcon FontSize="14" Symbol="SkipForward30" />
+                    </Button>
+                </StackPanel>
+                <StackPanel
+                    Grid.Column="2"
+                    HorizontalAlignment="Right"
+                    Orientation="Horizontal">
+                    <Button
+                        Command="{x:Bind ViewModel.ToggleFullScreenCommand, Mode=OneWay}"
+                        Style="{StaticResource IconButtonStyle}"
+                        ToolTipService.ToolTip="进入/退出全屏">
+                        <Grid>
+                            <ic:SymbolIcon
+                                FontSize="14"
+                                IconVariant="Filled"
+                                Symbol="FullScreenMaximize"
+                                Visibility="{x:Bind ViewModel.Player.IsFullScreen, Mode=OneWay, Converter={StaticResource BoolToVisibilityReverseConverter}}" />
+                            <ic:SymbolIcon
+                                FontSize="14"
+                                IconVariant="Filled"
+                                Symbol="FullScreenMinimize"
+                                Visibility="{x:Bind ViewModel.Player.IsFullScreen, Mode=OneWay}" />
+                        </Grid>
+                    </Button>
+                    <Button
+                        Command="{x:Bind ViewModel.ToggleCompactOverlayCommand, Mode=OneWay}"
+                        Style="{StaticResource IconButtonStyle}"
+                        ToolTipService.ToolTip="进入/退出小窗">
+                        <Grid>
+                            <ic:SymbolIcon
+                                FontSize="14"
+                                IconVariant="Filled"
+                                Symbol="ContractUpRight"
+                                Visibility="{x:Bind ViewModel.Player.IsCompactOverlay, Mode=OneWay, Converter={StaticResource BoolToVisibilityReverseConverter}}" />
+                            <ic:SymbolIcon
+                                FontSize="14"
+                                IconVariant="Filled"
+                                Symbol="ContractDownLeft"
+                                Visibility="{x:Bind ViewModel.Player.IsCompactOverlay, Mode=OneWay}" />
+                        </Grid>
+                    </Button>
+                </StackPanel>
+            </Grid>
         </Grid>
     </Grid>
 </local:PlayerControlBase>

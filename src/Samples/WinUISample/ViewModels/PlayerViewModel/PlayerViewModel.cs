@@ -63,7 +63,15 @@ public sealed partial class PlayerViewModel(
         Player.PropertyChanged += OnPlayerPropertyChanged;
         await Player.InitializeAsync();
         _playerWindow.Show();
+        CheckFullScreen();
+        CheckCompactOverlay();
     }
+
+    /// <summary>
+    /// 关闭播放器.
+    /// </summary>
+    public void Close()
+        => _playerWindow?.Close();
 
     /// <summary>
     /// 初始化播放器.
@@ -101,6 +109,21 @@ public sealed partial class PlayerViewModel(
         await _client.SetCurrentPositionAsync(position);
     }
 
+    /// <summary>
+    /// 改变音量.
+    /// </summary>
+    /// <param name="volume"></param>
+    /// <returns></returns>
+    public async Task ChangeVolumeAsync(double volume)
+    {
+        if (Player is null || volume < 0 || volume > 100 || Math.Abs(Player.Volume - volume) < 1)
+        {
+            return;
+        }
+
+        await _client.SetVolumeAsync(volume);
+    }
+
     [RelayCommand]
     private async Task PlayPauseAsync()
     {
@@ -123,6 +146,36 @@ public sealed partial class PlayerViewModel(
         }
     }
 
+    [RelayCommand]
+    private async Task ToggleFullScreenAsync()
+    {
+        if (Player is null)
+        {
+            return;
+        }
+
+        await _client.SetFullScreenStateAsync(!Player.IsFullScreen);
+    }
+
+    [RelayCommand]
+    private async Task ToggleCompactOverlayAsync()
+    {
+        if (Player is null)
+        {
+            return;
+        }
+
+        await _client.SetCompactOverlayStateAsync(!Player.IsCompactOverlay);
+    }
+
+    [RelayCommand]
+    private Task SkipBackward10Async()
+        => ChangePositionAsync(Math.Max(Player.Position - 10, 0));
+
+    [RelayCommand]
+    private Task SkipForward30Async()
+        => ChangePositionAsync(Math.Min(Player.Position + 30, Player.Duration - 1));
+
     private async void OnWindowDestroying(AppWindow sender, object args)
         => await DisposeAsync();
 
@@ -135,6 +188,38 @@ public sealed partial class PlayerViewModel(
         else if (e.PropertyName == nameof(Player.Duration))
         {
             DurationText = TimeSpan.FromSeconds(Player.Duration).ToString(@"hh\:mm\:ss");
+        }
+        else if (e.PropertyName == nameof(Player.IsFullScreen))
+        {
+            CheckFullScreen();
+        }
+        else if (e.PropertyName == nameof(Player.IsCompactOverlay))
+        {
+            CheckCompactOverlay();
+        }
+    }
+
+    private void CheckFullScreen()
+    {
+        if (Player.IsFullScreen && _playerWindow.GetWindow().Presenter.Kind != AppWindowPresenterKind.FullScreen)
+        {
+            _playerWindow.GetWindow().SetPresenter(AppWindowPresenterKind.FullScreen);
+        }
+        else if (!Player.IsFullScreen && _playerWindow.GetWindow().Presenter.Kind == AppWindowPresenterKind.FullScreen)
+        {
+            _playerWindow.GetWindow().SetPresenter(AppWindowPresenterKind.Default);
+        }
+    }
+
+    private void CheckCompactOverlay()
+    {
+        if (Player.IsCompactOverlay && _playerWindow.GetWindow().Presenter.Kind != AppWindowPresenterKind.CompactOverlay)
+        {
+            _playerWindow.GetWindow().SetPresenter(AppWindowPresenterKind.CompactOverlay);
+        }
+        else if (!Player.IsCompactOverlay && _playerWindow.GetWindow().Presenter.Kind == AppWindowPresenterKind.CompactOverlay)
+        {
+            _playerWindow.GetWindow().SetPresenter(AppWindowPresenterKind.Default);
         }
     }
 }

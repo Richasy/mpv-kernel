@@ -23,4 +23,7 @@ public sealed partial class PlayerOverlay : PlayerControlBase
 
     private async void OnProgressSliderValueChanged(object sender, Microsoft.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs e)
         => await ViewModel.ChangePositionAsync(e.NewValue);
+
+    private async void OnVolumeValueChanged(object sender, Microsoft.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs e)
+        => await ViewModel.ChangeVolumeAsync(e.NewValue);
 }
