@@ -2,16 +2,13 @@
 // Licensed under the MIT License.
 
 using Richasy.MpvKernel.Core.Models;
-using Richasy.MpvKernel.Player;
 using Richasy.MpvKernel.Player.Models;
 
 namespace WinUISample.Models;
 
-internal sealed class LocalMediaSourceResolver(string filePath) : IMpvMediaSourceResolver
+internal sealed class LocalMediaSourceResolver(string filePath) : MediaSourceResolverBase
 {
-    public IntPtr WindowHandle { get; set; }
-
-    public Task<MpvMediaSource> GetSourceAsync()
+    public override Task<MpvMediaSource> GetSourceAsync()
     {
         var options = new MpvPlayOptions
         {

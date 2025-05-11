@@ -11,10 +11,12 @@
     <UseWinUI>true</UseWinUI>
     <EnableMsixTooling>true</EnableMsixTooling>
     <Nullable>enable</Nullable>
+	<NoWarn>$(NoWarn);CA1724</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Controls\PlayerOverlay.xaml" />
     <None Remove="Controls\RootLayout.xaml" />
+    <None Remove="Pages\BiliVideoPage.xaml" />
     <None Remove="Pages\LocalVideoPage.xaml" />
   </ItemGroup>
 
@@ -48,6 +50,12 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" />
     <PackageReference Include="Microsoft.WindowsAppSDK" />
+    <PackageReference Include="Richasy.BiliKernel.Authorizers.TV" />
+    <PackageReference Include="Richasy.BiliKernel.Resolvers.WinUICookies" />
+    <PackageReference Include="Richasy.BiliKernel.Resolvers.WinUIQRCode" />
+    <PackageReference Include="Richasy.BiliKernel.Resolvers.WinUIToken" />
+    <PackageReference Include="Richasy.BiliKernel.Services.Media" />
+    <PackageReference Include="Richasy.BiliKernel.Services.User" />
     <PackageReference Include="Richasy.WinUIKernel.Share" />
     <PackageReference Include="RichasyKernel.Core" />
     <PackageReference Include="Serilog" />
@@ -57,6 +65,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MpvKernel.WinUI\MpvKernel.WinUI.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Pages\BiliVideoPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Controls\PlayerOverlay.xaml">

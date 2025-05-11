@@ -54,6 +54,7 @@ public sealed partial class MpvPlayer : ObservableObject, IAsyncDisposable
         try
         {
             _cachedSource = await _sourceResolver.GetSourceAsync();
+            Title = _cachedSource.Title;
         }
         catch (Exception ex)
         {
@@ -132,6 +133,7 @@ public sealed partial class MpvPlayer : ObservableObject, IAsyncDisposable
         try
         {
             _cachedSource = await _sourceResolver.GetSourceAsync();
+            Title = _cachedSource.Title;
         }
         catch (Exception ex)
         {

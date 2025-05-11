@@ -3,11 +3,12 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Dispatching;
-using Richasy.WinUIKernel.Share.Toolkits;
+using Richasy.BiliKernel;
 using Richasy.WinUIKernel.Share;
+using Richasy.WinUIKernel.Share.Toolkits;
 using RichasyKernel;
-using System.Diagnostics.CodeAnalysis;
 using Serilog;
+using System.Diagnostics.CodeAnalysis;
 using Windows.Storage;
 using WinUISample.Extensions;
 using WinUISample.ViewModels;
@@ -33,10 +34,20 @@ internal static class GlobalDependencies
             .AddDispatcherQueue()
             .AddShareToolkits()
             .AddXamlRootProvider()
-            .AddXamlRootProvider()
+
+            .AddBiliClient()
+            .AddBiliAuthenticator()
+            .AddWinUICookiesResolver()
+            .AddWinUITokenResolver()
+            .AddWinUIQRCodeResolver(RenderBiliQRCodeAsync)
+            .AddTVAuthenticationService()
+            .AddMyProfileService()
+            .AddUserService()
+            .AddPlayerService()
 
             .AddSingleton<AppViewModel>()
             .AddSingleton<LocalVideoPageViewModel>()
+            .AddSingleton<BiliVideoPageViewModel>()
             .AddTransient<PlayerViewModel>()
             .Build();
     }
@@ -97,4 +108,11 @@ internal static class GlobalDependencies
     public static T Get<T>(this object ele)
         where T : class
         => Kernel.GetRequiredService<T>();
+
+    private static Task RenderBiliQRCodeAsync(byte[] imageData)
+    {
+        var vm = Kernel.GetRequiredService<BiliVideoPageViewModel>();
+        vm.RenderQRCodeCommand.Execute(imageData);
+        return Task.CompletedTask;
+    }
 }

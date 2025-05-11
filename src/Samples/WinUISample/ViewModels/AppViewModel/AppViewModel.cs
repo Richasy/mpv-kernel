@@ -41,7 +41,7 @@ public sealed partial class AppViewModel : ViewModelBase
     public async Task OpenVideoAsync(string videoPath)
     {
         var playerVM = this.Get<PlayerViewModel>();
-        await playerVM.InitializeAsync(videoPath);
+        await playerVM.InitializeAsync(videoPath, CurrentSectionType);
         Players.Add(playerVM);
     }
 

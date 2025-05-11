@@ -57,6 +57,7 @@ public sealed partial class RootLayout : RootLayoutBase
         var pageType = ViewModel.CurrentSectionType switch
         {
             SectionType.Local => typeof(LocalVideoPage),
+            SectionType.BiliBili => typeof(BiliVideoPage),
             _ => typeof(Page),
         };
 

@@ -10,6 +10,7 @@ using Richasy.WinUIKernel.Share.Toolkits;
 using Richasy.WinUIKernel.Share.ViewModels;
 using System.ComponentModel;
 using WinUISample.Models;
+using WinUISample.Models.Constants;
 
 namespace WinUISample.ViewModels;
 
@@ -47,12 +48,13 @@ public sealed partial class PlayerViewModel(
     /// 初始化.
     /// </summary>
     /// <returns><see cref="Task"/>.</returns>
-    public async Task InitializeAsync(string localFilePath)
+    public async Task InitializeAsync(string filePath, SectionType type)
     {
         await InitializeInternalAsync();
-        var sourceResolver = new LocalMediaSourceResolver(localFilePath);
+        MediaSourceResolverBase sourceResolver = type is SectionType.Local
+            ? new LocalMediaSourceResolver(filePath)
+            : new BiliMediaSourceResolver(filePath);
         sourceResolver.WindowHandle = _playerWindow.Handle;
-        _playerWindow.GetWindow().Title = Path.GetFileNameWithoutExtension(localFilePath);
         if (Player is not null)
         {
             Player.PropertyChanged -= OnPlayerPropertyChanged;
@@ -196,6 +198,10 @@ public sealed partial class PlayerViewModel(
         else if (e.PropertyName == nameof(Player.IsCompactOverlay))
         {
             CheckCompactOverlay();
+        }
+        else if (e.PropertyName == nameof(Player.Title))
+        {
+            _playerWindow.GetWindow().Title = Player.Title;
         }
     }
 
