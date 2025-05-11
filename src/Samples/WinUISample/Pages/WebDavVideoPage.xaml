@@ -63,6 +63,7 @@
 
             <base:LoadingWidget
                 Grid.Row="1"
+                Margin="12"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Bottom"
                 Text="加载中..."

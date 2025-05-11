@@ -92,7 +92,31 @@ public sealed partial class PlayerViewModel(
 
         var mpvDllPath = settingsToolkit.ReadLocalSetting("LibMpvPath", string.Empty);
         _client = await MpvClient.CreateAsync(mpvDllPath, logger: logger);
-        
+        var decodeType = settingsToolkit.ReadLocalSetting("DecodeType", DecodeType.Auto);
+        if (decodeType == DecodeType.Auto)
+        {
+            await _client.SetVideoOutputAsync(VideoOutputType.Gpu);
+            await _client.SetGpuContextAsync(GpuContextType.Auto);
+            await _client.SetHardwareDecodeAsync(HardwareDecodeType.Auto);
+        }
+        else if (decodeType == DecodeType.D3D11)
+        {
+            await _client.SetVideoOutputAsync(VideoOutputType.Gpu);
+            await _client.SetGpuContextAsync(GpuContextType.D3D11);
+            await _client.SetHardwareDecodeAsync(HardwareDecodeType.D3D11va);
+        }
+        else if (decodeType == DecodeType.NVDEC)
+        {
+            await _client.SetVideoOutputAsync(VideoOutputType.Gpu);
+            await _client.SetGpuContextAsync(GpuContextType.Auto);
+            await _client.SetHardwareDecodeAsync(HardwareDecodeType.Nvdec);
+        }
+        else if (decodeType == DecodeType.Vulkan)
+        {
+            await _client.SetVideoOutputAsync(VideoOutputType.GpuNext);
+            await _client.SetGpuContextAsync(GpuContextType.WindowsVulkan);
+            await _client.SetHardwareDecodeAsync(HardwareDecodeType.Vulkan);
+        }
 
         if (_playerWindow?.IsDisposed != false)
         {

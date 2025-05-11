@@ -30,6 +30,9 @@ public sealed partial class AppViewModel
     [ObservableProperty]
     public partial string LibMpvPath { get; set; }
 
+    [ObservableProperty]
+    public partial DecodeType DecodeType { get; set; }
+
     /// <summary>
     /// 主窗口.
     /// </summary>

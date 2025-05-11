@@ -29,6 +29,7 @@ public sealed partial class RootLayout : RootLayoutBase
         Section.SelectedIndex = (int)ViewModel.CurrentSectionType;
         ViewModel.PropertyChanged += OnViewModelPropertyChanged;
         CheckPage();
+        DecodeComboBox.SelectedIndex = (int)ViewModel.DecodeType;
     }
 
     /// <inheritdoc/>
@@ -66,6 +67,16 @@ public sealed partial class RootLayout : RootLayoutBase
         {
             MainFrame.Navigate(pageType);
         }
+    }
+
+    private void OnDecodeChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (!IsLoaded)
+        {
+            return;
+        }
+
+        ViewModel.DecodeType = (DecodeType)DecodeComboBox.SelectedIndex;
     }
 }
 

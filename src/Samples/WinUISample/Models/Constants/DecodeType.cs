@@ -6,7 +6,7 @@ namespace WinUISample.Models.Constants;
 /// <summary>
 /// 偏好的解码模式.
 /// </summary>
-public enum PreferDecodeType
+public enum DecodeType
 {
     /// <summary>
     /// 自动.
@@ -24,17 +24,7 @@ public enum PreferDecodeType
     NVDEC,
 
     /// <summary>
-    /// DXVA2硬解.
-    /// </summary>
-    DXVA2,
-
-    /// <summary>
     /// Vulkan硬解.
     /// </summary>
     Vulkan,
-
-    /// <summary>
-    /// 自定义.
-    /// </summary>
-    Custom,
 }

@@ -2,10 +2,7 @@
 // Licensed under the MIT License.
 
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.UI.Dispatching;
 using Richasy.MpvKernel;
-using Richasy.MpvKernel.Core;
-using Richasy.MpvKernel.WinUI;
 using Richasy.WinUIKernel.Share.Toolkits;
 using Richasy.WinUIKernel.Share.ViewModels;
 using Windows.Storage;
@@ -29,6 +26,7 @@ public sealed partial class AppViewModel : ViewModelBase
         _fileToolkit = fileToolkit;
         CurrentSectionType = settingsToolkit.ReadLocalSetting("SectionType", SectionType.Local);
         LibMpvPath = settingsToolkit.ReadLocalSetting("LibMpvPath", string.Empty);
+        DecodeType = settingsToolkit.ReadLocalSetting("DecodeType", DecodeType.Auto);
         if (!string.IsNullOrEmpty(LibMpvPath))
         {
             MpvNative.Initialize(LibMpvPath);
@@ -64,19 +62,11 @@ public sealed partial class AppViewModel : ViewModelBase
         await Windows.System.Launcher.LaunchFolderAsync(storageFolder);
     }
 
-    private async Task OpenPlayerWindowAsync()
-    {
-        var mpvPath = _settingsToolkit.ReadLocalSetting("LibMpvPath", string.Empty);
-        var client = await MpvClient.CreateAsync(mpvPath);
-        await client.SetLogLevelAsync(MpvLogLevel.Info);
-        await client.UseIdleAsync(true);
-        var playerWindow = new MpvPlayerWindow(client, this.Get<DispatcherQueue>());
-        var wnd = playerWindow.GetWindow();
-
-    }
-
     partial void OnCurrentSectionTypeChanged(SectionType value)
     {
         _settingsToolkit.WriteLocalSetting("SectionType", value);
     }
+
+    partial void OnDecodeTypeChanged(DecodeType value)
+        => _settingsToolkit.WriteLocalSetting("DecodeType", value);
 }

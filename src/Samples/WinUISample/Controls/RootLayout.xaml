@@ -60,6 +60,15 @@
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                 MaxLines="1"
                 Text="{x:Bind ViewModel.LibMpvPath, Mode=OneWay}" />
+            <ComboBox
+                x:Name="DecodeComboBox"
+                Grid.Column="2"
+                SelectionChanged="OnDecodeChanged">
+                <ComboBoxItem Content="自动" />
+                <ComboBoxItem Content="D3D11" />
+                <ComboBoxItem Content="NVDEC" />
+                <ComboBoxItem Content="Vulkan" />
+            </ComboBox>
         </Grid>
         <Rectangle x:Name="PlacementRect" Grid.Row="1" />
         <Grid Grid.Row="2">
