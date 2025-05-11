@@ -16,8 +16,11 @@
   <ItemGroup>
     <None Remove="Controls\PlayerOverlay.xaml" />
     <None Remove="Controls\RootLayout.xaml" />
+    <None Remove="Controls\WebDavConfigDialog.xaml" />
+    <None Remove="Controls\WebDavStorageItemControl.xaml" />
     <None Remove="Pages\BiliVideoPage.xaml" />
     <None Remove="Pages\LocalVideoPage.xaml" />
+    <None Remove="Pages\WebDavVideoPage.xaml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -56,6 +59,7 @@
     <PackageReference Include="Richasy.BiliKernel.Resolvers.WinUIToken" />
     <PackageReference Include="Richasy.BiliKernel.Services.Media" />
     <PackageReference Include="Richasy.BiliKernel.Services.User" />
+    <PackageReference Include="Richasy.WebDavKernel.Core" />
     <PackageReference Include="Richasy.WinUIKernel.Share" />
     <PackageReference Include="RichasyKernel.Core" />
     <PackageReference Include="Serilog" />
@@ -65,6 +69,21 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MpvKernel.WinUI\MpvKernel.WinUI.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Controls\WebDavStorageItemControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Pages\WebDavVideoPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Controls\WebDavConfigDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Pages\BiliVideoPage.xaml">

@@ -5,6 +5,15 @@
     <None Update="App.xaml">
       <SubType>Designer</SubType>
     </None>
+    <Page Update="Controls\WebDavStorageItemControl.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Pages\WebDavVideoPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Controls\WebDavConfigDialog.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="Pages\BiliVideoPage.xaml">
       <SubType>Designer</SubType>
     </Page>

@@ -58,6 +58,7 @@ public sealed partial class RootLayout : RootLayoutBase
         {
             SectionType.Local => typeof(LocalVideoPage),
             SectionType.BiliBili => typeof(BiliVideoPage),
+            SectionType.WebDav => typeof(WebDavVideoPage),
             _ => typeof(Page),
         };
 

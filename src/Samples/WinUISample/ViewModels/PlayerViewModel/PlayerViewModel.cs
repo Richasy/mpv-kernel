@@ -51,9 +51,13 @@ public sealed partial class PlayerViewModel(
     public async Task InitializeAsync(string filePath, SectionType type)
     {
         await InitializeInternalAsync();
-        MediaSourceResolverBase sourceResolver = type is SectionType.Local
-            ? new LocalMediaSourceResolver(filePath)
-            : new BiliMediaSourceResolver(filePath);
+        MediaSourceResolverBase sourceResolver = type switch
+        {
+            SectionType.Local => new LocalMediaSourceResolver(filePath),
+            SectionType.WebDav => new WebDavMediaSourceResolver(filePath),
+            SectionType.BiliBili => new BiliMediaSourceResolver(filePath),
+            _ => throw new NotSupportedException($"不支持的类型: {type}.")
+        };
         sourceResolver.WindowHandle = _playerWindow.Handle;
         if (Player is not null)
         {
@@ -88,6 +92,7 @@ public sealed partial class PlayerViewModel(
 
         var mpvDllPath = settingsToolkit.ReadLocalSetting("LibMpvPath", string.Empty);
         _client = await MpvClient.CreateAsync(mpvDllPath, logger: logger);
+        
 
         if (_playerWindow?.IsDisposed != false)
         {

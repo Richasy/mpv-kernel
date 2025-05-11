@@ -4,6 +4,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Dispatching;
 using Richasy.BiliKernel;
+using Richasy.ReaderKernel;
 using Richasy.WinUIKernel.Share;
 using Richasy.WinUIKernel.Share.Toolkits;
 using RichasyKernel;
@@ -45,11 +46,16 @@ internal static class GlobalDependencies
             .AddUserService()
             .AddPlayerService()
 
+            .AddWebDavConnector()
+
             .AddSingleton<AppViewModel>()
             .AddSingleton<LocalVideoPageViewModel>()
             .AddSingleton<BiliVideoPageViewModel>()
+            .AddSingleton<WebDavVideoPageViewModel>()
             .AddTransient<PlayerViewModel>()
             .Build();
+
+        WinUIKernelShareExtensions.InitializeShareKernel(Kernel);
     }
 
     public static IKernelBuilder AddDispatcherQueue(this IKernelBuilder builder)
