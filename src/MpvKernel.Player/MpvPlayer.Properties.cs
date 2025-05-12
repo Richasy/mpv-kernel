@@ -99,5 +99,5 @@ public sealed partial class MpvPlayer
     /// 媒体标题.
     /// </summary>
     [ObservableProperty]
-    public partial string Title { get; set; }
+    public partial string? Title { get; set; }
 }
