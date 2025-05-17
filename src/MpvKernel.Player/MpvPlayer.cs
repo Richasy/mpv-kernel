@@ -20,11 +20,13 @@ public sealed partial class MpvPlayer : ObservableObject, IAsyncDisposable
     public MpvPlayer(
         MpvClient client,
         IMpvMediaSourceResolver sourceResolver,
+        IMpvMediaHistoryResolver? historyResolver = null,
         IMpvMediaSubtitleResolver? subtitleResolver = null,
         ILogger? logger = null)
     {
         Client = client;
         _sourceResolver = sourceResolver;
+        _historyResolver = historyResolver;
         _subtitleResolver = subtitleResolver;
         _logger = logger ?? NullLogger.Instance;
         _uiContext = SynchronizationContext.Current ?? throw new InvalidOperationException("Must be created on UI thread.");
@@ -32,6 +34,8 @@ public sealed partial class MpvPlayer : ObservableObject, IAsyncDisposable
         // 内部维护一个定时器用于刷新播放器状态.
         _statusTimer = new System.Timers.Timer(5000);
         _statusTimer.Elapsed += OnStatusTimerElapsedAsync;
+        _historyTimer = new System.Timers.Timer(8000);
+        _historyTimer.Elapsed += OnHistoryTimerElapsedAsync;
         PlaybackState = MpvPlayerState.Idle;
         Client.DataNotify += OnDataNotify;
         Client.ReachFileLoading += OnFileLoading;
@@ -54,6 +58,11 @@ public sealed partial class MpvPlayer : ObservableObject, IAsyncDisposable
         try
         {
             _cachedSource = await _sourceResolver.GetSourceAsync();
+            if (_historyResolver != null)
+            {
+                _cachedSource.Options.StartPosition = await _historyResolver.GetStartPositionAsync();
+            }
+
             Title = _cachedSource.Title;
         }
         catch (Exception ex)
@@ -63,6 +72,11 @@ public sealed partial class MpvPlayer : ObservableObject, IAsyncDisposable
         }
 
         _statusTimer.Start();
+        if (_historyResolver != null)
+        {
+            _historyTimer.Start();
+        }
+
         if (alsoPlay)
         {
             CheckStateProperties();
@@ -151,6 +165,9 @@ public sealed partial class MpvPlayer : ObservableObject, IAsyncDisposable
         _statusTimer.Elapsed -= OnStatusTimerElapsedAsync;
         _statusTimer.Stop();
         _statusTimer.Dispose();
+        _historyTimer.Elapsed -= OnHistoryTimerElapsedAsync;
+        _historyTimer.Stop();
+        _historyTimer.Dispose();
         await Client.DisposeAsync();
     }
 

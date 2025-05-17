@@ -12,12 +12,15 @@ namespace Richasy.MpvKernel.Player;
 public sealed partial class MpvPlayer
 {
     private readonly IMpvMediaSourceResolver? _sourceResolver;
+    private readonly IMpvMediaHistoryResolver? _historyResolver;
     private readonly IMpvMediaSubtitleResolver? _subtitleResolver;
     private readonly ILogger _logger;
     private readonly SynchronizationContext _uiContext;
     private readonly System.Timers.Timer _statusTimer;
+    private readonly System.Timers.Timer _historyTimer;
 
     private MpvMediaSource? _cachedSource;
+    private bool _positionRecorded;
 
     /// <summary>
     /// MPV 播放器的客户端实例.

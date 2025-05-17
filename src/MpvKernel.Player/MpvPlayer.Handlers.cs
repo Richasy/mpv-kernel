@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Richasy. All rights reserved.
 // Licensed under the MIT License.
 
+using Microsoft.Extensions.Logging;
 using Richasy.MpvKernel.Core.Enums;
 using Richasy.MpvKernel.Core.Models;
 using System.Timers;
@@ -12,13 +13,30 @@ public sealed partial class MpvPlayer
     private async void OnStatusTimerElapsedAsync(object? sender, ElapsedEventArgs e)
         => await RefreshStatusAsync();
 
-    private void OnClientShutdown(object? sender, EventArgs e)
+    private async void OnHistoryTimerElapsedAsync(object? sender, ElapsedEventArgs e)
+    {
+        if (_historyResolver != null && !IsLoading && Duration > 0 && !_positionRecorded)
+        {
+            try
+            {
+                await _historyResolver.SaveHistoryAsync(Position);
+                _positionRecorded = true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to save history.");
+            }
+        }
+    }
+
+    private async void OnClientShutdown(object? sender, EventArgs e)
     {
         Client.Shutdown -= OnClientShutdown;
         Client.ReachFileLoaded -= OnFileLoaded;
         Client.ReachFileLoading -= OnFileLoading;
         Client.ReachFileEnd -= OnFileEnd;
         Client.DataNotify -= OnDataNotify;
+        var position = Position;
         _uiContext.Post(_ =>
         {
             PlaybackState = MpvPlayerState.Idle;
@@ -30,6 +48,11 @@ public sealed partial class MpvPlayer
             IsFullScreen = false;
             IsCompactOverlay = false;
         }, default);
+
+        if (_historyResolver != null)
+        {
+            await _historyResolver.SaveHistoryAsync(Position);
+        }
     }
 
     private void OnFileEnd(object? sender, EventArgs e)
@@ -58,6 +81,7 @@ public sealed partial class MpvPlayer
                 _uiContext.Post(_ => Duration = (double)e.Data, default);
                 break;
             case MpvClientEventId.PositionChanged:
+                _positionRecorded = false;
                 _uiContext.Post(_ => Position = (double)e.Data, default);
                 break;
             case MpvClientEventId.FullScreenChanged:
