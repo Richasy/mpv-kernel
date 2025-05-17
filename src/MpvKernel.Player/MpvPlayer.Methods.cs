@@ -12,7 +12,6 @@ public sealed partial class MpvPlayer
             IsPlaying = PlaybackState == Core.Enums.MpvPlayerState.Playing;
             IsBuffering = PlaybackState is Core.Enums.MpvPlayerState.Buffering or Core.Enums.MpvPlayerState.Seeking;
             IsStopped = PlaybackState is Core.Enums.MpvPlayerState.Idle or Core.Enums.MpvPlayerState.End;
-            IsLoading = !IsPlaying && !IsStopped && !IsBuffering;
         }, default);
     }
 

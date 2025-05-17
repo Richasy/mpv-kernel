@@ -142,6 +142,7 @@ public sealed partial class MpvPlayer : ObservableObject, IAsyncDisposable
         }
 
         await Client.PlayAsync(_cachedSource.Url, _cachedSource.Options);
+        await Client.ResumeAsync();
     }
 
     /// <inheritdoc/>
