@@ -29,7 +29,7 @@ public sealed partial class MpvPlayer
         }
     }
 
-    private async void OnClientShutdown(object? sender, EventArgs e)
+    private void OnClientShutdown(object? sender, EventArgs e)
     {
         Client.Shutdown -= OnClientShutdown;
         Client.ReachFileLoaded -= OnFileLoaded;
@@ -48,11 +48,6 @@ public sealed partial class MpvPlayer
             IsFullScreen = false;
             IsCompactOverlay = false;
         }, default);
-
-        if (_historyResolver != null)
-        {
-            await _historyResolver.SaveHistoryAsync(Position, Duration);
-        }
     }
 
     private void OnFileEnd(object? sender, EventArgs e)

@@ -34,7 +34,7 @@ public sealed partial class MpvPlayer : ObservableObject, IAsyncDisposable
         // 内部维护一个定时器用于刷新播放器状态.
         _statusTimer = new System.Timers.Timer(5000);
         _statusTimer.Elapsed += OnStatusTimerElapsedAsync;
-        _historyTimer = new System.Timers.Timer(8000);
+        _historyTimer = new System.Timers.Timer(5000);
         _historyTimer.Elapsed += OnHistoryTimerElapsedAsync;
         PlaybackState = MpvPlayerState.Idle;
         Client.DataNotify += OnDataNotify;
@@ -162,6 +162,11 @@ public sealed partial class MpvPlayer : ObservableObject, IAsyncDisposable
     /// <inheritdoc/>
     public async ValueTask DisposeAsync()
     {
+        if (_historyResolver != null && Duration > 0)
+        {
+            await _historyResolver.SaveHistoryAsync(Position, Duration);
+        }
+
         _statusTimer.Elapsed -= OnStatusTimerElapsedAsync;
         _statusTimer.Stop();
         _statusTimer.Dispose();
