@@ -19,7 +19,7 @@ public sealed partial class MpvPlayer
         {
             try
             {
-                await _historyResolver.SaveHistoryAsync(Position);
+                await _historyResolver.SaveHistoryAsync(Position, Duration);
                 _positionRecorded = true;
             }
             catch (Exception ex)
@@ -51,7 +51,7 @@ public sealed partial class MpvPlayer
 
         if (_historyResolver != null)
         {
-            await _historyResolver.SaveHistoryAsync(Position);
+            await _historyResolver.SaveHistoryAsync(Position, Duration);
         }
     }
 

@@ -18,5 +18,5 @@ public interface IMpvMediaHistoryResolver
     /// 保存历史记录.
     /// </summary>
     /// <returns><see cref="Task"/>.</returns>
-    public Task SaveHistoryAsync(double position);
+    public Task SaveHistoryAsync(double position, double duration);
 }
