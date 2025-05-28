@@ -372,9 +372,7 @@ public sealed partial class MpvClient
     public async Task<Result> SetExternalSubtitleTrackAsync(string externalUrl)
     {
         var errorCode = MpvError.Success;
-        await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "sid", "no"));
-        await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "sub-file", "\"{externalUrl}\""));
-        await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "sid", "auto"));
+        await Task.Run(() => errorCode = MpvNative.SetCommandString(_handle, $"sub-add {externalUrl} cached"));
         return WrapAsResult(errorCode, "Mpv | set external subtitle track failed");
     }
 
@@ -399,7 +397,7 @@ public sealed partial class MpvClient
     public async Task<Result> SetExternalAudioTrackAsync(string externalUrl)
     {
         var errorCode = MpvError.Success;
-        await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "audio-file", externalUrl));
+        await Task.Run(() => errorCode = MpvNative.SetCommandString(_handle, $"audio-add {externalUrl} cached"));
         return WrapAsResult(errorCode, "Mpv | set external audio track failed");
     }
 
