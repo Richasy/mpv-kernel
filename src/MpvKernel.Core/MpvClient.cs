@@ -72,6 +72,7 @@ public sealed partial class MpvClient : IAsyncDisposable
         await ObservePropertyAsync(Seeking, MpvFormat.Flag);
         await ObservePropertyAsync(FullScreen, MpvFormat.Flag);
         await ObservePropertyAsync(CompactOverlay, MpvFormat.Flag);
+        await ObservePropertyAsync(Metadata, MpvFormat.Node);
         return instance;
 
         // 无法预期会出现怎样的错误，这里直接抛出异常.

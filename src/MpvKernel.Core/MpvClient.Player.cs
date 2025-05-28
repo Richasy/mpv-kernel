@@ -74,9 +74,34 @@ public sealed partial class MpvClient
                 commandOptions.Add($"speed={Math.Round(options.InitialSpeed.Value, 2)}");
             }
 
-            if (!string.IsNullOrEmpty(options.ExtraAudioUrl))
+            if (options.Subtitles?.Count > 0)
             {
-                commandOptions.Add($"audio-file=\"{options.ExtraAudioUrl}\"");
+                if (options.Subtitles.Count == 1)
+                {
+                    commandOptions.Add($"sub-file=\"{options.Subtitles[0]}\"");
+                }
+                else
+                {
+                    foreach (var item in options.Subtitles)
+                    {
+                        commandOptions.Add($"sub-files-append=\"{item}\"");
+                    }
+                }
+            }
+
+            if (options.AudioTracks?.Count > 0)
+            {
+                if (options.AudioTracks.Count == 1)
+                {
+                    commandOptions.Add($"audio-file=\"{options.AudioTracks[0]}\"");
+                }
+                else
+                {
+                    foreach (var item in options.AudioTracks)
+                    {
+                        commandOptions.Add($"audio-files-append=\"{item}\"");
+                    }
+                }
             }
         }
 
@@ -324,5 +349,59 @@ public sealed partial class MpvClient
         var node = new MpvNode(speed);
         await Task.Run(() => errorCode = MpvNative.SetProperty(_handle, Speed, MpvFormat.Double, ref node));
         return WrapAsResult(errorCode, "Mpv | set speed failed");
+    }
+
+    /// <summary>
+    /// 设置字幕轨道.
+    /// </summary>
+    /// <param name="trackId">字幕ID.</param>
+    /// <returns><see cref="Task"/>.</returns>
+    public async Task<Result> SetSubtitleTrackAsync(int? trackId)
+    {
+        var errorCode = MpvError.Success;
+        var node = trackId.HasValue ? new MpvNode(trackId.Value) : new MpvNode("no");
+        await Task.Run(() => errorCode = MpvNative.SetProperty(_handle, "sid", MpvFormat.Node, ref node));
+        return WrapAsResult(errorCode, "Mpv | set subtitle track failed");
+    }
+
+    /// <summary>
+    /// 获取当前的轨道列表.
+    /// </summary>
+    /// <returns>轨道信息.</returns>
+    public async Task<Result<List<MpvTrackInfo>>> GetTracksAsync()
+    {
+        var errorCode = MpvError.Success;
+        var result = new MpvNode();
+        await Task.Run(() => errorCode = MpvNative.GetProperty(_handle, "track-list", MpvFormat.Node, out result));
+        if (errorCode != MpvError.Success)
+        {
+            return Result.Fail($"Mpv | get subtitle tracks failed: {errorCode}");
+        }
+
+        if (MpvNodeList.ToMpvNodeArray(result.RemoteNodeListValue) is not MpvNode[] trackList)
+        {
+            return Result.Fail("Mpv | get subtitle tracks failed: invalid node format");
+        }
+
+        var resultList = new List<MpvTrackInfo>();
+        foreach (var item in trackList)
+        {
+            var trackMeta = MpvNodeList.ToDictionary(item.RemoteNodeListValue);
+            var track = new MpvTrackInfo();
+            var typeStr = trackMeta.TryGetValue("type", out var typeNode) ? typeNode.StringValue : null;
+            track.Type = typeStr switch
+            {
+                "audio" => MpvTrackType.Audio,
+                "video" => MpvTrackType.Video,
+                "sub" => MpvTrackType.Subtitle,
+                _ => MpvTrackType.Unknown,
+            };
+            track.Id = trackMeta.TryGetValue("id", out var idNode) ? Convert.ToInt32(idNode.IntegerValue) : -1;
+            track.Title = trackMeta.TryGetValue("title", out var titleNode) ? titleNode.StringValue : trackMeta.TryGetValue("lang", out var langNode) ? langNode.StringValue : null;
+            track.Current = trackMeta.TryGetValue("selected", out var currentNode) && currentNode.Flag != 0;
+            resultList.Add(track);
+        }
+
+        return Result.Ok(resultList);
     }
 }

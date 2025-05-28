@@ -49,7 +49,12 @@ public sealed class MpvPlayOptions
     public bool? EnableYtdl { get; set; }
 
     /// <summary>
-    /// 附加音轨 URL.
+    /// 字幕列表.
     /// </summary>
-    public string? ExtraAudioUrl { get; set; }
+    public List<string>? Subtitles { get; set; }
+
+    /// <summary>
+    /// 音轨列表.
+    /// </summary>
+    public List<string>? AudioTracks { get; set; }
 }

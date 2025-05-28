@@ -42,4 +42,9 @@ public enum MpvClientEventId
     /// 小窗状态发生变化.
     /// </summary>
     CompactOverlayChanged,
+
+    /// <summary>
+    /// 媒体元数据加载完成.
+    /// </summary>
+    MetadataLoaded,
 }

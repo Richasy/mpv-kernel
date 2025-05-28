@@ -54,7 +54,7 @@ public sealed partial class MpvClient
             case MpvEventId.Seek:
                 {
                     var stateResult = await GetPlayerStateAsync();
-                    if(stateResult.IsFailed)
+                    if (stateResult.IsFailed)
                     {
                         _logger.LogError($"[MPV] Failed to get player state: {stateResult.Errors}");
                         return;
@@ -121,6 +121,18 @@ public sealed partial class MpvClient
         {
             var speed = Marshal.PtrToStructure<double>(eventProp.DataPtr);
             SendNotify(MpvClientEventId.SpeedChanged, speed);
+        }
+        else if (eventProp.Name == Metadata)
+        {
+            var metadata = Marshal.PtrToStructure<MpvNode>(eventProp.DataPtr);
+            if (MpvNodeList.ToDictionary(metadata.RemoteNodeListValue) is Dictionary<string, MpvNode> nodeDict)
+            {
+                SendNotify(MpvClientEventId.MetadataLoaded, nodeDict.Select(p => (p.Key, p.Value.StringValue)).ToDictionary());
+            }
+            else
+            {
+                SendNotify(MpvClientEventId.MetadataLoaded, default);
+            }
         }
     }
 }

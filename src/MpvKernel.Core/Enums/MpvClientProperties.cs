@@ -18,4 +18,6 @@ internal static class MpvClientProperties
     public static string Stop => "stop";
     public static string FullScreen => "fullscreen";
     public static string CompactOverlay => "ontop";
+
+    public static string Metadata => "metadata";
 }

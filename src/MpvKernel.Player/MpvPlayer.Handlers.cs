@@ -59,7 +59,7 @@ public sealed partial class MpvPlayer
         }, default);
     }
 
-    private void OnDataNotify(object? sender, MpvClientNotifyEventArgs e)
+    private async void OnDataNotify(object? sender, MpvClientNotifyEventArgs e)
     {
         switch (e.Id)
         {
@@ -84,6 +84,9 @@ public sealed partial class MpvPlayer
                 break;
             case MpvClientEventId.CompactOverlayChanged:
                 _uiContext.Post(_ => IsCompactOverlay = (bool)e.Data, default);
+                break;
+            case MpvClientEventId.MetadataLoaded:
+                await InitializeTracksAsync();
                 break;
             default:
                 break;

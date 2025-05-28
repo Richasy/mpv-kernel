@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Richasy. All rights reserved.
 // Licensed under the MIT License.
 
+using Richasy.MpvKernel.Player.Models;
+
 namespace Richasy.MpvKernel.Player;
 
 public sealed partial class MpvPlayer
@@ -17,4 +19,17 @@ public sealed partial class MpvPlayer
 
     private void TryShowSubtitle()
         => _subtitleResolver?.ShowSubtitle(Convert.ToInt32(Position));
+
+    private async Task InitializeTracksAsync()
+    {
+        var tracks = await Client.GetTracksAsync();
+        if (tracks.IsSuccess)
+        {
+            _uiContext.Post(_ =>
+            {
+                var args = new MpvTrackLoadedEventArgs(tracks.Value);
+                TrackLoaded?.Invoke(this, args);
+            }, default);
+        }
+    }
 }

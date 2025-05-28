@@ -31,79 +31,47 @@ public struct MpvNodeList
     internal IntPtr _keysPtr;
 
     /// <summary>
-    /// <para>Mpv_FORMAT_NODE_ARRAY:</para>
-    /// <para>values[N] refers to value of the Nth item</para>
+    /// Convert to an array of <see cref="MpvNode"/>.
     /// </summary>
-    public MpvNodeList[]? ValuesArray => this.ToArray();
-
-    /// <summary>
-    /// <para>Mpv_FORMAT_NODE_MAP:</para>
-    /// <para>values[N] refers to value of the Nth key/value pair</para>
-    /// <para>If num &gt; 0, values[0] to values[num-1] (inclusive) are valid.</para>
-    /// <para>Otherwise, this can be NULL</para>
-    /// </summary>
-    public Dictionary<string, MpvNodeList>? ValuesMap => this.ToDictionary();
-
-    /// <summary>
-    /// Initializes a new instance of MpvNodeList using an array of existing MpvNodeList instances. Allocates memory for
-    /// the nodes.
-    /// </summary>
-    /// <param name="values">An array of existing instances is used to populate the new instance and allocate the necessary memory.</param>
-    public MpvNodeList(params MpvNodeList[] values)
+    /// <param name="n"></param>
+    public static explicit operator MpvNode[](MpvNodeList n)
     {
-        Num = values.Length;
-        _nodesPtr = Marshal.AllocCoTaskMem(Marshal.SizeOf<MpvNodeList>() * Num);
-        for (int i = 0; i < Num; i++)
-            Marshal.StructureToPtr(values[i], _nodesPtr + (i * Marshal.SizeOf<MpvNodeList>()), false);
-    }
-
-    /// <summary>
-    /// Initializes a new instance of MpvNodeList using a dictionary of string keys and MpvNodeList values.
-    /// </summary>
-    /// <param name="values">The dictionary provides key-value pairs where each key is a string and each value is an MpvNodeList.</param>
-    public MpvNodeList(Dictionary<string, MpvNodeList> values)
-    {
-        Num = values.Count;
-        var valKeys = values.Keys.ToArray();
-        _keysPtr = Marshal.AllocCoTaskMem(Marshal.SizeOf<IntPtr>() * Num);
-        for (int i = 0; i < Num; i++)
+        var result = new MpvNode[n.Num];
+        for (var i = 0; i < n.Num; i++)
         {
-            var ptr = Marshal.StringToCoTaskMemUTF8(valKeys[i]);
-            Marshal.WriteIntPtr(_keysPtr, i * Marshal.SizeOf<IntPtr>(), ptr);
-        }
-
-        _nodesPtr = Marshal.AllocCoTaskMem(Marshal.SizeOf<MpvNodeList>() * Num);
-        int c = 0;
-        foreach (var item in values)
-        {
-            Marshal.StructureToPtr(item.Value, _nodesPtr + (c * Marshal.SizeOf<MpvNodeList>()), false);
-            c++;
-        }
-    }
-
-    private MpvNodeList[]? ToArray()
-    {
-        if (_nodesPtr == IntPtr.Zero)
-            return null;
-        var result = new MpvNodeList[Num];
-        for (int i = 0; i < Num; i++)
-            result[i] = Marshal.PtrToStructure<MpvNodeList>(_nodesPtr + (i * Marshal.SizeOf<MpvNodeList>()));
-        return result;
-    }
-
-    private Dictionary<string, MpvNodeList>? ToDictionary()
-    {
-        if (_keysPtr == IntPtr.Zero || _nodesPtr == IntPtr.Zero)
-            return null;
-        var result = new Dictionary<string, MpvNodeList>(Num);
-        for (int i = 0; i < Num; i++)
-        {
-            var val = Marshal.PtrToStructure<MpvNodeList>(_nodesPtr + (i * Marshal.SizeOf<MpvNodeList>()));
-            var keyPtr = Marshal.ReadIntPtr(_keysPtr, i * Marshal.SizeOf<IntPtr>());
-            var key = Marshal.PtrToStringUTF8(keyPtr);
-            result.Add(key!, val);
+            result[i] = Marshal.PtrToStructure<MpvNode>(n._nodesPtr + i * 16);
         }
 
         return result;
     }
+
+    /// <summary>
+    /// Convert to a dictionary of <see cref="string"/> keys and <see cref="MpvNode"/> values.
+    /// </summary>
+    public static explicit operator Dictionary<string, MpvNode>?(MpvNodeList n)
+    {
+        if (n._keysPtr == IntPtr.Zero)
+        {
+            return null;
+        }
+        var arr = (MpvNode[])n;
+        var result = new Dictionary<string, MpvNode>();
+        for (var i = 0; i < n.Num; i++)
+        {
+            var key = Marshal.PtrToStringUTF8(Marshal.ReadIntPtr(n._keysPtr + i * nint.Size));
+            result[key!] = arr[i];
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Convert to an array of <see cref="MpvNode"/>.
+    /// </summary>
+    public static MpvNode[]? ToMpvNodeArray(MpvNodeList n) => (MpvNode[]?)n;
+
+    /// <summary>
+    /// Convert to an array of <see cref="MpvNode"/>.
+    /// </summary>
+    public static Dictionary<string, MpvNode>? ToDictionary(MpvNodeList n) => (Dictionary<string, MpvNode>?)n;
 }

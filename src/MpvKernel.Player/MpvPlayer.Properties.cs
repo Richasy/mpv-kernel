@@ -23,6 +23,11 @@ public sealed partial class MpvPlayer
     private bool _positionRecorded;
 
     /// <summary>
+    /// 轨道加载事件.
+    /// </summary>
+    public event EventHandler<MpvTrackLoadedEventArgs> TrackLoaded;
+
+    /// <summary>
     /// MPV 播放器的客户端实例.
     /// </summary>
     public MpvClient Client { get; }
