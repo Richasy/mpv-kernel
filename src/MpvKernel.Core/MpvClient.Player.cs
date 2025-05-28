@@ -84,7 +84,7 @@ public sealed partial class MpvClient
                 {
                     foreach (var item in options.Subtitles)
                     {
-                        commandOptions.Add($"sub-files-append=\"{item}\"");
+                        commandOptions.Add($"sub-files-append={item}");
                     }
                 }
             }
@@ -365,11 +365,51 @@ public sealed partial class MpvClient
     }
 
     /// <summary>
+    /// 设置外挂字幕轨道.
+    /// </summary>
+    /// <param name="externalUrl">字幕路径.</param>
+    /// <returns><see cref="Task"/>.</returns>
+    public async Task<Result> SetExternalSubtitleTrackAsync(string externalUrl)
+    {
+        var errorCode = MpvError.Success;
+        await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "sid", "no"));
+        await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "sub-file", "\"{externalUrl}\""));
+        await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "sid", "auto"));
+        return WrapAsResult(errorCode, "Mpv | set external subtitle track failed");
+    }
+
+    /// <summary>
+    /// 设置音频轨道.
+    /// </summary>
+    /// <param name="trackId">音频ID.</param>
+    /// <returns><see cref="Task"/>.</returns>
+    public async Task<Result> SetAudioTrackAsync(int? trackId)
+    {
+        var errorCode = MpvError.Success;
+        var node = trackId.HasValue ? new MpvNode(trackId.Value) : new MpvNode("no");
+        await Task.Run(() => errorCode = MpvNative.SetProperty(_handle, "aid", MpvFormat.Node, ref node));
+        return WrapAsResult(errorCode, "Mpv | set audio track failed");
+    }
+
+    /// <summary>
+    /// 设置外挂音频轨道.
+    /// </summary>
+    /// <param name="externalUrl">音频路径.</param>
+    /// <returns><see cref="Task"/>.</returns>
+    public async Task<Result> SetExternalAudioTrackAsync(string externalUrl)
+    {
+        var errorCode = MpvError.Success;
+        await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "audio-file", externalUrl));
+        return WrapAsResult(errorCode, "Mpv | set external audio track failed");
+    }
+
+    /// <summary>
     /// 获取当前的轨道列表.
     /// </summary>
     /// <returns>轨道信息.</returns>
     public async Task<Result<List<MpvTrackInfo>>> GetTracksAsync()
     {
+        System.Diagnostics.Debug.WriteLine("Track updated");
         var errorCode = MpvError.Success;
         var result = new MpvNode();
         await Task.Run(() => errorCode = MpvNative.GetProperty(_handle, "track-list", MpvFormat.Node, out result));

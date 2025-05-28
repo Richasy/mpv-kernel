@@ -27,8 +27,8 @@ public sealed partial class MpvPlayer
         {
             _uiContext.Post(_ =>
             {
-                var args = new MpvTrackLoadedEventArgs(tracks.Value);
-                TrackLoaded?.Invoke(this, args);
+                var args = new MpvTrackUpdatedEventArgs(tracks.Value);
+                TrackUpdated?.Invoke(this, args);
             }, default);
         }
     }

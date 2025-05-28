@@ -47,4 +47,9 @@ public enum MpvClientEventId
     /// 媒体元数据加载完成.
     /// </summary>
     MetadataLoaded,
+
+    /// <summary>
+    /// 轨道数发生变化.
+    /// </summary>
+    TrackCountChanged,
 }

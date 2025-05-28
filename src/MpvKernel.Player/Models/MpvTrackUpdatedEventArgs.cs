@@ -8,7 +8,7 @@ namespace Richasy.MpvKernel.Player.Models;
 /// <summary>
 /// MPV 轨道加载事件参数.
 /// </summary>
-public sealed class MpvTrackLoadedEventArgs(List<MpvTrackInfo> tracks) : EventArgs
+public sealed class MpvTrackUpdatedEventArgs(List<MpvTrackInfo> tracks) : EventArgs
 {
     /// <summary>
     /// 轨道列表.

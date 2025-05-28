@@ -25,7 +25,7 @@ public sealed partial class MpvPlayer
     /// <summary>
     /// 轨道加载事件.
     /// </summary>
-    public event EventHandler<MpvTrackLoadedEventArgs> TrackLoaded;
+    public event EventHandler<MpvTrackUpdatedEventArgs> TrackUpdated;
 
     /// <summary>
     /// MPV 播放器的客户端实例.

@@ -85,7 +85,7 @@ public sealed partial class MpvPlayer
             case MpvClientEventId.CompactOverlayChanged:
                 _uiContext.Post(_ => IsCompactOverlay = (bool)e.Data, default);
                 break;
-            case MpvClientEventId.MetadataLoaded:
+            case MpvClientEventId.TrackCountChanged:
                 await InitializeTracksAsync();
                 break;
             default:

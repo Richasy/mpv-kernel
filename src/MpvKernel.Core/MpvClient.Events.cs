@@ -129,10 +129,10 @@ public sealed partial class MpvClient
             {
                 SendNotify(MpvClientEventId.MetadataLoaded, nodeDict.Select(p => (p.Key, p.Value.StringValue)).ToDictionary());
             }
-            else
-            {
-                SendNotify(MpvClientEventId.MetadataLoaded, default);
-            }
+        }
+        else if (eventProp.Name == TrackCount)
+        {
+            SendNotify(MpvClientEventId.TrackCountChanged, default);
         }
     }
 }
