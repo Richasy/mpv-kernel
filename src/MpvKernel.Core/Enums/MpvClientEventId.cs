@@ -24,6 +24,11 @@ public enum MpvClientEventId
     SpeedChanged,
 
     /// <summary>
+    /// 缓存速度发生变化.
+    /// </summary>
+    CacheSpeedChanged,
+
+    /// <summary>
     /// 视频时长发生变化.
     /// </summary>
     DurationChanged,
@@ -52,4 +57,9 @@ public enum MpvClientEventId
     /// 轨道数发生变化.
     /// </summary>
     TrackCountChanged,
+
+    /// <summary>
+    /// 播放流已准备就绪并开始播放.
+    /// </summary>
+    PlaybackRestart,
 }

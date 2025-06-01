@@ -164,7 +164,15 @@ public sealed partial class MpvPlayer : ObservableObject, IAsyncDisposable
     {
         if (_historyResolver != null && Duration > 0)
         {
-            await _historyResolver.SaveHistoryAsync(Position, Duration);
+#pragma warning disable RCS1075 // Avoid empty catch clause that catches System.Exception
+            try
+            {
+                await _historyResolver.SaveHistoryAsync(Position, Duration, isExiting: true);
+            }
+            catch (Exception)
+            {
+            }
+#pragma warning restore RCS1075 // Avoid empty catch clause that catches System.Exception
         }
 
         _statusTimer.Elapsed -= OnStatusTimerElapsedAsync;

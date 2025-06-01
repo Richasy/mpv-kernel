@@ -108,4 +108,16 @@ public sealed partial class MpvPlayer
     /// </summary>
     [ObservableProperty]
     public partial string? Title { get; set; }
+
+    /// <summary>
+    /// 播放流是否已经初始化.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool IsPlaybackInitialized { get; private set; }
+
+    /// <summary>
+    /// 缓存速度.
+    /// </summary>
+    [ObservableProperty]
+    public partial long CacheSpeed { get; set; }
 }

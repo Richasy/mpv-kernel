@@ -68,6 +68,9 @@ public sealed partial class MpvClient
                 var eventProp = Marshal.PtrToStructure<MpvEventProperty>(@event.DataPtr);
                 HandleObservePropertyChanged(eventProp);
                 break;
+            case MpvEventId.PlaybackRestart:
+                SendNotify(MpvClientEventId.PlaybackRestart, default);
+                break;
             default:
                 _logger.LogInformation($"[MPV] Event received: {@event.EventId}");
                 break;
@@ -121,6 +124,11 @@ public sealed partial class MpvClient
         {
             var speed = Marshal.PtrToStructure<double>(eventProp.DataPtr);
             SendNotify(MpvClientEventId.SpeedChanged, speed);
+        }
+        else if (eventProp.Name == CacheSpeed)
+        {
+            var cacheSpeed = Marshal.PtrToStructure<long>(eventProp.DataPtr);
+            SendNotify(MpvClientEventId.CacheSpeedChanged, cacheSpeed);
         }
         else if (eventProp.Name == Metadata)
         {

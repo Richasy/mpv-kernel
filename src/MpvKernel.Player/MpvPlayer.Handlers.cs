@@ -88,6 +88,12 @@ public sealed partial class MpvPlayer
             case MpvClientEventId.TrackCountChanged:
                 await InitializeTracksAsync();
                 break;
+            case MpvClientEventId.PlaybackRestart:
+                _uiContext.Post(_ => IsPlaybackInitialized = true, default);
+                break;
+            case MpvClientEventId.CacheSpeedChanged:
+                _uiContext.Post(_ => CacheSpeed = (long)e.Data, default);
+                break;
             default:
                 break;
         }

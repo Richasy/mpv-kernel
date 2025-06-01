@@ -25,6 +25,9 @@ public sealed partial class MpvClient
         List<string> commandArgs = ["loadfile", $"\"{filePath}\"", "replace", "0"];
         List<string> commandOptions = [];
 
+        await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "background-color", "#000000"));
+        ThrowIfFailed(errorCode, "Mpv | set background-color failed");
+
         if (options != null)
         {
             if (options.WindowHandle != null)
@@ -349,6 +352,24 @@ public sealed partial class MpvClient
         var node = new MpvNode(speed);
         await Task.Run(() => errorCode = MpvNative.SetProperty(_handle, Speed, MpvFormat.Double, ref node));
         return WrapAsResult(errorCode, "Mpv | set speed failed");
+    }
+
+    /// <summary>
+    /// 获取当前的缓存速度(byte/s).
+    /// </summary>
+    /// <returns>结果.</returns>
+    public async Task<Result<long>> GetCacheSpeedAsync()
+    {
+        var errorCode = MpvError.Success;
+        var result = new MpvNode();
+        await Task.Run(() => errorCode = MpvNative.GetProperty(_handle, CacheSpeed, MpvFormat.Int64, out result));
+        var cacheSpeedResult = WrapAsResult(errorCode, "Mpv | get cache speed failed");
+        if (cacheSpeedResult.IsFailed)
+        {
+            return cacheSpeedResult;
+        }
+
+        return result.IntegerValue;
     }
 
     /// <summary>
