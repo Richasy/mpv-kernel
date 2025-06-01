@@ -91,8 +91,8 @@ public sealed partial class MpvPlayer : ObservableObject, IAsyncDisposable
         _sourceResolver = sourceResolver ?? throw new ArgumentNullException(nameof(sourceResolver));
         _historyResolver = historyResolver;
         _subtitleResolver = subtitleResolver;
-        _statusTimer.Stop();
-        _historyTimer.Stop();
+        _statusTimer?.Stop();
+        _historyTimer?.Stop();
     }
 
     /// <summary>
