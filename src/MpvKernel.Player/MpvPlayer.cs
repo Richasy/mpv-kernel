@@ -25,9 +25,7 @@ public sealed partial class MpvPlayer : ObservableObject, IAsyncDisposable
         ILogger? logger = null)
     {
         Client = client;
-        _sourceResolver = sourceResolver;
-        _historyResolver = historyResolver;
-        _subtitleResolver = subtitleResolver;
+        UpdateResolvers(sourceResolver, historyResolver, subtitleResolver);
         _logger = logger ?? NullLogger.Instance;
         _uiContext = SynchronizationContext.Current ?? throw new InvalidOperationException("Must be created on UI thread.");
 
@@ -57,6 +55,7 @@ public sealed partial class MpvPlayer : ObservableObject, IAsyncDisposable
 
         try
         {
+            ResetProperties();
             _cachedSource = await _sourceResolver.GetSourceAsync();
             if (_historyResolver != null)
             {
@@ -82,6 +81,18 @@ public sealed partial class MpvPlayer : ObservableObject, IAsyncDisposable
             CheckStateProperties();
             await Client.PlayAsync(_cachedSource.Url, _cachedSource.Options);
         }
+    }
+
+    /// <summary>
+    /// 更新解析器.
+    /// </summary>
+    public void UpdateResolvers(IMpvMediaSourceResolver sourceResolver, IMpvMediaHistoryResolver? historyResolver = null, IMpvMediaSubtitleResolver? subtitleResolver = null)
+    {
+        _sourceResolver = sourceResolver ?? throw new ArgumentNullException(nameof(sourceResolver));
+        _historyResolver = historyResolver;
+        _subtitleResolver = subtitleResolver;
+        _statusTimer.Stop();
+        _historyTimer.Stop();
     }
 
     /// <summary>
@@ -182,6 +193,17 @@ public sealed partial class MpvPlayer : ObservableObject, IAsyncDisposable
         _historyTimer.Stop();
         _historyTimer.Dispose();
         await Client.DisposeAsync();
+    }
+
+    private void ResetProperties()
+    {
+        _uiContext.Post(_ =>
+        {
+            PlaybackState = MpvPlayerState.Idle;
+            IsPlaybackInitialized = false;
+            Duration = 0;
+            Position = 0;
+        }, default);
     }
 
     partial void OnPlaybackStateChanged(MpvPlayerState value)
