@@ -25,9 +25,6 @@ public sealed partial class MpvClient
         List<string> commandArgs = ["loadfile", $"\"{filePath}\"", "replace", "0"];
         List<string> commandOptions = [];
 
-        await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "background-color", "#000000"));
-        ThrowIfFailed(errorCode, "Mpv | set background-color failed");
-
         if (options != null)
         {
             if (options.WindowHandle != null)
