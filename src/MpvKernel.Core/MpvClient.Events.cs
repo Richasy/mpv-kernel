@@ -30,6 +30,11 @@ public sealed partial class MpvClient
     /// </summary>
     public event EventHandler ReachFileLoaded;
 
+    /// <summary>
+    /// 发生错误.
+    /// </summary>
+    public event EventHandler<MpvError> ErrorOccurred;
+
     private async void HandleEvent(MpvEvent @event)
     {
         switch (@event.EventId)
@@ -74,6 +79,11 @@ public sealed partial class MpvClient
             default:
                 _logger.LogInformation($"[MPV] Event received: {@event.EventId}");
                 break;
+        }
+
+        if (@event.Error != MpvError.Success)
+        {
+            ErrorOccurred?.Invoke(this, @event.Error);
         }
     }
 
