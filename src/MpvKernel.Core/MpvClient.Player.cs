@@ -4,6 +4,7 @@
 using FluentResults;
 using Richasy.MpvKernel.Core.Enums;
 using Richasy.MpvKernel.Core.Models;
+using System.Globalization;
 using static Richasy.MpvKernel.Core.Enums.MpvClientProperties;
 
 namespace Richasy.MpvKernel.Core;
@@ -390,7 +391,17 @@ public sealed partial class MpvClient
     public async Task<Result> SetExternalSubtitleTrackAsync(string externalUrl)
     {
         var errorCode = MpvError.Success;
-        await Task.Run(() => errorCode = MpvNative.SetCommandString(_handle, $"sub-add {externalUrl} cached"));
+        try
+        {
+            var waitTask = Task.Delay(TimeSpan.FromSeconds(8));
+            var subTask = Task.Run(() => errorCode = MpvNative.SetCommandString(_handle, $"sub-add {externalUrl} cached"));
+            await Task.WhenAny(waitTask, subTask);
+        }
+        catch (Exception)
+        {
+            return Result.Fail("Mpv | set external subtitle track failed: operation timed out");
+        }
+
         return WrapAsResult(errorCode, "Mpv | set external subtitle track failed");
     }
 
@@ -420,12 +431,11 @@ public sealed partial class MpvClient
     }
 
     /// <summary>
-    /// 获取当前的轨道列表.
+    /// 获取文件的轨道列表.
     /// </summary>
     /// <returns>轨道信息.</returns>
     public async Task<Result<List<MpvTrackInfo>>> GetTracksAsync()
     {
-        System.Diagnostics.Debug.WriteLine("Track updated");
         var errorCode = MpvError.Success;
         var result = new MpvNode();
         await Task.Run(() => errorCode = MpvNative.GetProperty(_handle, "track-list", MpvFormat.Node, out result));
@@ -453,11 +463,98 @@ public sealed partial class MpvClient
                 _ => MpvTrackType.Unknown,
             };
             track.Id = trackMeta.TryGetValue("id", out var idNode) ? Convert.ToInt32(idNode.IntegerValue) : -1;
-            track.Title = trackMeta.TryGetValue("title", out var titleNode) ? titleNode.StringValue : trackMeta.TryGetValue("lang", out var langNode) ? langNode.StringValue : null;
+            var title = trackMeta.TryGetValue("title", out var titleNode) ? titleNode.StringValue : null;
+            var lang = trackMeta.TryGetValue("lang", out var langNode) ? langNode.StringValue : null;
+            var codecDesc = trackMeta.TryGetValue("codec-desc", out var codecDescNode) ? codecDescNode.StringValue : null;
+            var demux = trackMeta.TryGetValue("demux-samplerate", out var demuxNode) ? demuxNode.IntegerValue.ToString() : null;
+            var decoder = trackMeta.TryGetValue("decoder-desc", out var decoderNode) ? decoderNode.StringValue : null;
+            var metadata = trackMeta.TryGetValue("metadata", out var metadataNode) ? MpvNodeList.ToDictionary(metadataNode.RemoteNodeListValue) : null;
+            if (!string.IsNullOrEmpty(lang))
+            {
+#pragma warning disable RCS1075 // Avoid empty catch clause that catches System.Exception
+                try
+                {
+                    lang = CultureInfo.GetCultureInfo(lang)?.DisplayName;
+                }
+                catch (Exception)
+                {
+                }
+#pragma warning restore RCS1075 // Avoid empty catch clause that catches System.Exception
+            }
+            track.Title = track.Type switch
+            {
+                MpvTrackType.Audio => string.IsNullOrEmpty(demux) ? title : $"{title} ({demux}) {codecDesc}".Trim(),
+                MpvTrackType.Subtitle => string.IsNullOrEmpty(lang) ? title ?? decoder ?? codecDesc : $"{title} {lang} {decoder} {codecDesc}".Trim(),
+                _ => title,
+            };
             track.Current = trackMeta.TryGetValue("selected", out var currentNode) && currentNode.Flag != 0;
             resultList.Add(track);
         }
 
         return Result.Ok(resultList);
+    }
+
+    /// <summary>
+    /// 获取当前的音频轨道信息.
+    /// </summary>
+    /// <returns><see cref="MpvTrackInfo"/>.</returns>
+    public async Task<Result<MpvTrackInfo>> GetCurrentAudioTrackAsync()
+    {
+        var errorCode = MpvError.Success;
+        var result = new MpvNode();
+        await Task.Run(() => errorCode = MpvNative.GetProperty(_handle, "current-tracks/audio", MpvFormat.Node, out result));
+        if (errorCode != MpvError.Success)
+        {
+            return Result.Fail($"Mpv | get current audio track failed: {errorCode}");
+        }
+
+        var trackMeta = MpvNodeList.ToDictionary(result.RemoteNodeListValue);
+        if (trackMeta == null || trackMeta.Count == 0)
+        {
+            return Result.Fail("Mpv | get current audio track failed: invalid node format");
+        }
+
+        var title = trackMeta.TryGetValue("title", out var titleNode) ? titleNode.StringValue : null;
+        var codec = trackMeta.TryGetValue("codecDesc", out var codecNode) ? codecNode.StringValue : null;
+        var track = new MpvTrackInfo
+        {
+            Type = MpvTrackType.Audio,
+            Id = trackMeta.TryGetValue("id", out var idNode) ? Convert.ToInt32(idNode.IntegerValue) : -1,
+            Title = string.IsNullOrEmpty(codec) ? title : $"{title} ({codec})".Trim(),
+            Current = true,
+        };
+
+        return Result.Ok(track);
+    }
+
+    /// <summary>
+    /// 获取当前的字幕轨道信息.
+    /// </summary>
+    /// <returns><see cref="MpvTrackInfo"/>.</returns>
+    public async Task<Result<MpvTrackInfo>> GetCurrentSubtitleTrackAsync()
+    {
+        var errorCode = MpvError.Success;
+        var result = new MpvNode();
+        await Task.Run(() => errorCode = MpvNative.GetProperty(_handle, "current-tracks/sub", MpvFormat.NodeMap, out result));
+        if (errorCode != MpvError.Success)
+        {
+            return Result.Fail($"Mpv | get current subtitle track failed: {errorCode}");
+        }
+        var trackMeta = MpvNodeList.ToDictionary(result.RemoteNodeListValue);
+        if (trackMeta == null || trackMeta.Count == 0)
+        {
+            return Result.Fail("Mpv | get current subtitle track failed: invalid node format");
+        }
+
+        var title = trackMeta.TryGetValue("title", out var titleNode) ? titleNode.StringValue : null;
+        var lang = trackMeta.TryGetValue("lang", out var langNode) ? langNode.StringValue : null;
+        var track = new MpvTrackInfo
+        {
+            Type = MpvTrackType.Subtitle,
+            Id = trackMeta.TryGetValue("id", out var idNode) ? Convert.ToInt32(idNode.IntegerValue) : -1,
+            Title = string.IsNullOrEmpty(lang) ? title : $"{title} ({lang})".Trim(),
+            Current = true,
+        };
+        return Result.Ok(track);
     }
 }

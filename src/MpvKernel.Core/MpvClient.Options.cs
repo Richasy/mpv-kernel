@@ -156,4 +156,16 @@ public sealed partial class MpvClient
         await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "screenshot-format", formatStr));
         ThrowIfFailed(errorCode, "Mpv | set screenshot-format failed");
     }
+
+    /// <summary>
+    /// 设置是否验证TLS证书.
+    /// </summary>
+    /// <param name="enabled">是否验证</param>
+    /// <returns><see cref="Task"/>.</returns>
+    public async Task SetTlsVerifyAsync(bool enabled)
+    {
+        var errorCode = MpvError.Success;
+        await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "tls-verify", enabled ? "yes" : "no"));
+        ThrowIfFailed(errorCode, "Mpv | set tls-verify failed");
+    }
 }
