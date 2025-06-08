@@ -26,5 +26,9 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     <PackageReference Include="RichasyKernel.Abstractions" />
   </ItemGroup>
+
+  <ItemGroup>
+  	<InternalsVisibleTo Include="Richasy.MpvKernel.Player" />
+  </ItemGroup>
   
 </Project>

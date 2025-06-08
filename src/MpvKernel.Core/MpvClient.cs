@@ -143,6 +143,9 @@ public sealed partial class MpvClient : IAsyncDisposable
         return WrapAsResult(errorCode, "Mpv | set keep open failed");
     }
 
+    internal void ThrowError(MpvError errorCode)
+        => ErrorOccurred?.Invoke(this, errorCode);
+
     /// <summary>
     /// 初始化（启动事件轮询）.
     /// </summary>

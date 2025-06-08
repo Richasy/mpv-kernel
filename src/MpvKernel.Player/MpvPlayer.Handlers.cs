@@ -103,6 +103,11 @@ public sealed partial class MpvPlayer
     {
         _uiContext.Post(_ => IsLoading = false, default);
         await RefreshStatusAsync();
+        if (Math.Abs(Duration - 1) < 0.01)
+        {
+            // No file loaded, throw an error.
+            _uiContext.Post(_ => Client.ThrowError(MpvError.LoadingFailed), default);
+        }
     }
 
     private void OnFileLoading(object? sender, EventArgs e)
