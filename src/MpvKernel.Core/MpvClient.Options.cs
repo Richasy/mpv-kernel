@@ -168,4 +168,20 @@ public sealed partial class MpvClient
         await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "tls-verify", enabled ? "yes" : "no"));
         ThrowIfFailed(errorCode, "Mpv | set tls-verify failed");
     }
+
+    /// <summary>
+    /// 设置是否自动加载配置文件.
+    /// </summary>
+    public async Task SetLoadAutoProfilesAsync(bool? enabled)
+    {
+        var errorCode = MpvError.Success;
+        var value = enabled switch
+        {
+            true => "yes",
+            false => "no",
+            _ => "auto",
+        };
+        await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "load-auto-profiles", value));
+        ThrowIfFailed(errorCode, "Mpv | set load-auto-profiles failed");
+    }
 }
