@@ -184,4 +184,16 @@ public sealed partial class MpvClient
         await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "load-auto-profiles", value));
         ThrowIfFailed(errorCode, "Mpv | set load-auto-profiles failed");
     }
+
+    /// <summary>
+    /// 设置自动创建播放列表的行为.
+    /// </summary>
+    /// <param name="kind">行为模式.</param>
+    /// <returns><see cref="Task"/>.</returns>
+    public async Task SetAutoCreatePlaylistAsync(AutoCreatePlaylistKind kind)
+    {
+        var errorCode = MpvError.Success;
+        await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "autocreate-playlist", kind.ToString().ToLowerInvariant()));
+        ThrowIfFailed(errorCode, "Mpv | set autocreate-playlist failed");
+    }
 }

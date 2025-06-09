@@ -29,4 +29,7 @@ public sealed class MpvException : Exception
     /// <param name="error">Holds the error code associated with the exception.</param>
     /// <param name="innerException">Holds the exception that is the cause of the current exception.</param>
     public MpvException(string message, MpvError error, Exception innerException) : base(message, innerException) => Code = error;
+
+    /// <inheritdoc/>
+    public override string ToString() => $"Code: {Code} | Message: {Message}";
 }
