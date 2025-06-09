@@ -4,7 +4,6 @@
 using FluentResults;
 using Richasy.MpvKernel.Core.Enums;
 using Richasy.MpvKernel.Core.Models;
-using System.Globalization;
 using static Richasy.MpvKernel.Core.Enums.MpvClientProperties;
 
 namespace Richasy.MpvKernel.Core;
@@ -469,24 +468,13 @@ public sealed partial class MpvClient
             var demux = trackMeta.TryGetValue("demux-samplerate", out var demuxNode) ? demuxNode.IntegerValue.ToString() : null;
             var decoder = trackMeta.TryGetValue("decoder-desc", out var decoderNode) ? decoderNode.StringValue : null;
             var metadata = trackMeta.TryGetValue("metadata", out var metadataNode) ? MpvNodeList.ToDictionary(metadataNode.RemoteNodeListValue) : null;
-            if (!string.IsNullOrEmpty(lang))
-            {
-#pragma warning disable RCS1075 // Avoid empty catch clause that catches System.Exception
-                try
-                {
-                    lang = CultureInfo.GetCultureInfo(lang)?.DisplayName;
-                }
-                catch (Exception)
-                {
-                }
-#pragma warning restore RCS1075 // Avoid empty catch clause that catches System.Exception
-            }
             track.Title = track.Type switch
             {
-                MpvTrackType.Audio => string.IsNullOrEmpty(demux) ? title : $"{title} ({demux}) {codecDesc}".Trim(),
+                MpvTrackType.Audio => string.IsNullOrEmpty(demux) ? title : $"{title} {codecDesc}".Trim(),
                 MpvTrackType.Subtitle => string.IsNullOrEmpty(lang) ? title ?? decoder ?? codecDesc : $"{title} {lang} {decoder} {codecDesc}".Trim(),
                 _ => title,
             };
+            track.Language = lang;
             track.Current = trackMeta.TryGetValue("selected", out var currentNode) && currentNode.Flag != 0;
             resultList.Add(track);
         }
@@ -516,11 +504,13 @@ public sealed partial class MpvClient
 
         var title = trackMeta.TryGetValue("title", out var titleNode) ? titleNode.StringValue : null;
         var codec = trackMeta.TryGetValue("codecDesc", out var codecNode) ? codecNode.StringValue : null;
+        var lang = trackMeta.TryGetValue("lang", out var langNode) ? langNode.StringValue : null;
         var track = new MpvTrackInfo
         {
             Type = MpvTrackType.Audio,
             Id = trackMeta.TryGetValue("id", out var idNode) ? Convert.ToInt32(idNode.IntegerValue) : -1,
             Title = string.IsNullOrEmpty(codec) ? title : $"{title} ({codec})".Trim(),
+            Language = lang,
             Current = true,
         };
 

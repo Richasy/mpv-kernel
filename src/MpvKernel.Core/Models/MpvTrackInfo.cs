@@ -26,6 +26,11 @@ public sealed class MpvTrackInfo
     public int Id { get; set; }
 
     /// <summary>
+    /// 语言.
+    /// </summary>
+    public string? Language { get; set; }
+
+    /// <summary>
     /// 当前轨道.
     /// </summary>
     public bool Current { get; set; }
