@@ -69,6 +69,11 @@ public sealed partial class MpvPlayer : ObservableObject, IAsyncDisposable
             throw;
         }
 
+        if (_isDisposed)
+        {
+            return;
+        }
+
         _statusTimer.Start();
         if (_historyResolver != null)
         {
@@ -176,6 +181,7 @@ public sealed partial class MpvPlayer : ObservableObject, IAsyncDisposable
     /// <inheritdoc/>
     public async ValueTask DisposeAsync()
     {
+        _isDisposed = true;
         if (_historyResolver != null && Duration > 0)
         {
 #pragma warning disable RCS1075 // Avoid empty catch clause that catches System.Exception
