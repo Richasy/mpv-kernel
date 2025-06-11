@@ -525,7 +525,7 @@ public sealed partial class MpvClient
     {
         var errorCode = MpvError.Success;
         var result = new MpvNode();
-        await Task.Run(() => errorCode = MpvNative.GetProperty(_handle, "current-tracks/sub", MpvFormat.NodeMap, out result));
+        await Task.Run(() => errorCode = MpvNative.GetProperty(_handle, "current-tracks/sub", MpvFormat.Node, out result));
         if (errorCode != MpvError.Success)
         {
             return Result.Fail($"Mpv | get current subtitle track failed: {errorCode}");
