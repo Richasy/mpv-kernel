@@ -4,6 +4,7 @@
 using FluentResults;
 using Richasy.MpvKernel.Core.Enums;
 using Richasy.MpvKernel.Core.Models;
+using System.Globalization;
 using static Richasy.MpvKernel.Core.Enums.MpvClientProperties;
 
 namespace Richasy.MpvKernel.Core;
@@ -468,12 +469,20 @@ public sealed partial class MpvClient
             var demux = trackMeta.TryGetValue("demux-samplerate", out var demuxNode) ? demuxNode.IntegerValue.ToString() : null;
             var decoder = trackMeta.TryGetValue("decoder-desc", out var decoderNode) ? decoderNode.StringValue : null;
             var metadata = trackMeta.TryGetValue("metadata", out var metadataNode) ? MpvNodeList.ToDictionary(metadataNode.RemoteNodeListValue) : null;
+            long? audioChannels = trackMeta.TryGetValue("audio-channels", out var audioChannelsNode) ? audioChannelsNode.IntegerValue : null;
+            var langString = string.IsNullOrEmpty(lang) ? default : new CultureInfo(lang).DisplayName;
             track.Title = track.Type switch
             {
-                MpvTrackType.Audio => string.IsNullOrEmpty(demux) ? title : $"{title} {codecDesc}".Trim(),
-                MpvTrackType.Subtitle => string.IsNullOrEmpty(lang) ? title ?? decoder ?? codecDesc : $"{title} {lang} {decoder} {codecDesc}".Trim(),
+                MpvTrackType.Audio => string.IsNullOrEmpty(lang) ? title ?? codecDesc : $"{title} {langString} {codecDesc}".Trim(),
+                MpvTrackType.Subtitle => string.IsNullOrEmpty(lang) ? title ?? decoder ?? codecDesc : $"{title} {langString} {decoder} {codecDesc}".Trim(),
                 _ => title,
             };
+
+            if(track.Type == MpvTrackType.Audio && audioChannels.HasValue)
+            {
+                track.Title = $"{track.Title} ({audioChannels} ch)".Trim();
+            }
+
             track.Language = lang;
             track.Current = trackMeta.TryGetValue("selected", out var currentNode) && currentNode.Flag != 0;
             resultList.Add(track);
