@@ -478,7 +478,7 @@ public sealed partial class MpvClient
                 _ => title,
             };
 
-            if(track.Type == MpvTrackType.Audio && audioChannels.HasValue)
+            if (track.Type == MpvTrackType.Audio && audioChannels.HasValue)
             {
                 track.Title = $"{track.Title} ({audioChannels} ch)".Trim();
             }
@@ -555,5 +555,24 @@ public sealed partial class MpvClient
             Current = true,
         };
         return Result.Ok(track);
+    }
+
+    /// <summary>
+    /// 设置音频通道布局.
+    /// </summary>
+    public async Task<Result> SetAudioChannelLayoutAsync(AudioChannelLayoutType layout, string[]? customLayouts = default)
+    {
+        var errorCode = MpvError.Success;
+        var layoutStr = layout switch
+        {
+            AudioChannelLayoutType.Stereo => "stereo",
+            AudioChannelLayoutType.Auto => "auto",
+            AudioChannelLayoutType.Mono => "mono",
+            AudioChannelLayoutType.Custom when customLayouts != null => string.Join(',', customLayouts),
+            _ => throw new ArgumentOutOfRangeException(nameof(layout), "Unsupported audio channel layout type."),
+        };
+
+        await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "audio-channels", layoutStr));
+        return WrapAsResult(errorCode, "Mpv | set audio channel layout failed");
     }
 }
