@@ -49,6 +49,11 @@ public sealed class MpvPlayOptions
     public bool? EnableYtdl { get; set; }
 
     /// <summary>
+    /// 媒体名称.
+    /// </summary>
+    public string? MediaName { get; set; }
+
+    /// <summary>
     /// 字幕列表.
     /// </summary>
     public List<string>? Subtitles { get; set; }
