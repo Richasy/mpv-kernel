@@ -75,10 +75,10 @@ public sealed partial class MpvClient
                 commandOptions.Add($"speed={Math.Round(options.InitialSpeed.Value, 2)}");
             }
 
-            if (!string.IsNullOrEmpty(options.MediaName))
-            {
-                commandOptions.Add($"force-media-title=\"{options.MediaName}\"");
-            }
+            //if (!string.IsNullOrEmpty(options.MediaName))
+            //{
+            //    commandOptions.Add($"force-media-title=\"{options.MediaName}\"");
+            //}
 
             if (options.Subtitles?.Count > 0)
             {
