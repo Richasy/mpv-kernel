@@ -55,6 +55,7 @@ public sealed partial class MpvPlayer : ObservableObject, IAsyncDisposable
 
         try
         {
+            ResetProperties();
             _cachedSource = await _sourceResolver.GetSourceAsync();
             if (_historyResolver != null)
             {
@@ -208,7 +209,6 @@ public sealed partial class MpvPlayer : ObservableObject, IAsyncDisposable
     {
         _uiContext.Post(_ =>
         {
-            PlaybackState = MpvPlayerState.Idle;
             IsPlaybackInitialized = false;
             Duration = 0;
             Position = 0;
