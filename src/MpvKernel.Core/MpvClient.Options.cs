@@ -196,4 +196,23 @@ public sealed partial class MpvClient
         await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "autocreate-playlist", kind.ToString().ToLowerInvariant()));
         ThrowIfFailed(errorCode, "Mpv | set autocreate-playlist failed");
     }
+
+    /// <summary>
+    /// 设置HTTP代理.
+    /// </summary>
+    /// <returns><see cref="Task"/>.</returns>
+    public async Task SetHttpProxyAsync(string? proxy)
+    {
+        var errorCode = MpvError.Success;
+        if (string.IsNullOrEmpty(proxy))
+        {
+            await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "http-proxy", "none"));
+        }
+        else
+        {
+            await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "http-proxy", proxy));
+        }
+
+        ThrowIfFailed(errorCode, "Mpv | set http-proxy failed");
+    }
 }
