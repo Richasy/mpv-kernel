@@ -51,6 +51,12 @@ public sealed partial class MpvClient
                 System.Diagnostics.Debug.WriteLine($"[MPV] Log message: {logMessage.Level} - {logMessage.Text}");
 #endif
                 _logger.LogInformation($"[MPV] Log message: {logMessage.Level} - {logMessage.Text}");
+                if (logMessage.LogLevel == MpvLogLevel.Error && logMessage.Text.Contains("Subprocess failed: init", StringComparison.OrdinalIgnoreCase))
+                {
+                    // 意味着播放失败，需要抛出该异常.
+                    ErrorOccurred?.Invoke(this, MpvError.VoInitFailed);
+                }
+
                 break;
             case MpvEventId.FileLoaded:
                 ReachFileLoaded?.Invoke(this, EventArgs.Empty);
