@@ -580,4 +580,43 @@ public sealed partial class MpvClient
         await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "audio-channels", layoutStr));
         return WrapAsResult(errorCode, "Mpv | set audio channel layout failed");
     }
+
+    /// <summary>
+    /// 获取章节列表.
+    /// </summary>
+    /// <returns>章节列表</returns>
+    public async Task<Result<List<MpvChapterInfo>>> GetChaptersAsync()
+    {
+        var errorCode = MpvError.Success;
+        var result = new MpvNode();
+        await Task.Run(() => errorCode = MpvNative.GetProperty(_handle, "chapter-list", MpvFormat.Node, out result));
+        if (errorCode != MpvError.Success)
+        {
+            return Result.Fail($"Mpv | get chapter list failed: {errorCode}");
+        }
+
+        if (MpvNodeList.ToMpvNodeArray(result.RemoteNodeListValue) is not MpvNode[] chapterList)
+        {
+            return Result.Fail("Mpv | get chapter list failed: invalid node format");
+        }
+
+        var resultList = new List<MpvChapterInfo>();
+        foreach (var item in chapterList)
+        {
+            var chapterMeta = MpvNodeList.ToDictionary(item.RemoteNodeListValue);
+            if (chapterMeta == null || chapterMeta.Count == 0)
+            {
+                continue;
+            }
+            var title = chapterMeta.TryGetValue("title", out var titleNode) ? titleNode.StringValue : null;
+            var time = chapterMeta.TryGetValue("time", out var timeNode) ? timeNode.DoubleValue : 0;
+            resultList.Add(new MpvChapterInfo
+            {
+                Title = title ?? string.Empty,
+                Time = time,
+            });
+        }
+
+        return Result.Ok(resultList);
+    }
 }
