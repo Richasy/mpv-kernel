@@ -478,8 +478,8 @@ public sealed partial class MpvClient
             var langString = string.IsNullOrEmpty(lang) ? default : new CultureInfo(lang).DisplayName;
             track.Title = track.Type switch
             {
-                MpvTrackType.Audio => string.IsNullOrEmpty(lang) ? title ?? codecDesc : $"{title} {langString} {codecDesc}".Trim(),
-                MpvTrackType.Subtitle => string.IsNullOrEmpty(lang) ? title ?? decoder ?? codecDesc : $"{title} {langString} {decoder} {codecDesc}".Trim(),
+                MpvTrackType.Audio => string.IsNullOrEmpty(lang) ? title ?? codecDesc : $"{title} {codecDesc}".Trim(),
+                MpvTrackType.Subtitle => string.IsNullOrEmpty(lang) ? title ?? decoder ?? codecDesc : $"{title} {decoder} {codecDesc}".Trim(),
                 _ => title,
             };
 
