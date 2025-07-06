@@ -20,6 +20,6 @@ internal static class MpvClientProperties
     public static string CompactOverlay => "ontop";
     public static string Metadata => "metadata";
     public static string TrackCount => "track-list/count";
-
     public static string CacheSpeed => "cache-speed";
+    public static string DemuxerCacheState => "demuxer-cache-state";
 }

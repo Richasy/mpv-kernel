@@ -3,6 +3,7 @@
 
 using Microsoft.Extensions.Logging;
 using Richasy.MpvKernel.Core.Enums;
+using Richasy.MpvKernel.Core.Models;
 using System.Runtime.InteropServices;
 using static Richasy.MpvKernel.Core.Enums.MpvClientProperties;
 
@@ -34,6 +35,11 @@ public sealed partial class MpvClient
     /// 发生错误.
     /// </summary>
     public event EventHandler<MpvError> ErrorOccurred;
+
+    /// <summary>
+    /// 缓冲状态发生变化事件.
+    /// </summary>
+    public event EventHandler<MpvCacheStateEventArgs> CacheStateChanged;
 
     private async void HandleEvent(MpvEvent @event)
     {
@@ -157,6 +163,42 @@ public sealed partial class MpvClient
         else if (eventProp.Name == TrackCount)
         {
             SendNotify(MpvClientEventId.TrackCountChanged, default);
+        }
+        else if (eventProp.Name == DemuxerCacheState)
+        {
+            var cacheState = Marshal.PtrToStructure<MpvNode>(eventProp.DataPtr);
+            if (MpvNodeList.ToDictionary(cacheState.RemoteNodeListValue) is Dictionary<string, MpvNode> nodeDict
+                && nodeDict.ContainsKey("seekable-ranges"))
+            {
+                var rangeNodes = MpvNodeList.ToMpvNodeArray(nodeDict.First(p => p.Key == "seekable-ranges").Value.RemoteNodeListValue);
+                var ranges = new List<MpvSeekableRange>();
+                foreach (var item in rangeNodes ?? [])
+                {
+                    var map = MpvNodeList.ToDictionary(item.RemoteNodeListValue);
+                    if (map != null && map.TryGetValue("start", out var startNode) && map.TryGetValue("end", out var endNode))
+                    {
+                        ranges.Add(new MpvSeekableRange
+                        {
+                            Start = startNode.DoubleValue,
+                            End = endNode.DoubleValue
+                        });
+                    }
+                }
+
+                var bofCached = nodeDict.TryGetValue("bof-cached", out var bofCachedNode) && bofCachedNode.Flag != 0;
+                var eofCached = nodeDict.TryGetValue("eof-cached", out var eofCachedNode) && eofCachedNode.Flag != 0;
+                var fwBytes = nodeDict.TryGetValue("fw-bytes", out var fwBytesNode) ? fwBytesNode.IntegerValue : 0;
+                var fileBytes = nodeDict.TryGetValue("file-cache-bytes", out var bwBytesNode) ? bwBytesNode.IntegerValue : 0;
+                var cacheStateArgs = new MpvCacheStateEventArgs(ranges)
+                {
+                    BofCached = bofCached,
+                    EofCached = eofCached,
+                    FwBytes = fwBytes,
+                    FileCacheBytes = fileBytes
+                };
+
+                CacheStateChanged?.Invoke(this, cacheStateArgs);
+            }
         }
     }
 }
