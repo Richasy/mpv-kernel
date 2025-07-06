@@ -215,4 +215,34 @@ public sealed partial class MpvClient
 
         ThrowIfFailed(errorCode, "Mpv | set http-proxy failed");
     }
+
+    /// <summary>
+    /// 设置 demuxer 最大字节数（视作缓冲容量）.
+    /// </summary>
+    /// <param name="byteSize">接受 KiB, MiB, GiB 作为单位后缀.</param>
+    /// <returns><see cref="Task"/>.</returns>
+    public async Task SetDemuxerMaxBytesAsync(string byteSize)
+    {
+        var errorCode = MpvError.Success;
+        await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "demuxer-max-bytes", byteSize));
+        ThrowIfFailed(errorCode, "Mpv | set demuxer-max-bytes failed");
+    }
+
+    /// <summary>
+    /// 设置 demuxer 读取头部的秒数（视作缓冲秒数）.
+    /// </summary>
+    /// <param name="seconds">秒数</param>
+    /// <returns><see cref="Task"/>.</returns>
+    public async Task SetDemuxerReadheadSecondsAsync(int seconds)
+    {
+        if (seconds < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(seconds), "Seconds must be greater than 0.");
+        }
+
+        var errorCode = MpvError.Success;
+        var node = new MpvNode(seconds);
+        await Task.Run(() => errorCode = MpvNative.SetOption(_handle, "demuxer-readahead-secs", MpvFormat.Int64, ref node));
+        ThrowIfFailed(errorCode, "Mpv | set demuxer-readahead-secs failed");
+    }
 }
