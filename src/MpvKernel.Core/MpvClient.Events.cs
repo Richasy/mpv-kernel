@@ -62,6 +62,10 @@ public sealed partial class MpvClient
                     // 意味着播放失败，需要抛出该异常.
                     ErrorOccurred?.Invoke(this, MpvError.VoInitFailed);
                 }
+                else if (logMessage.LogLevel == MpvLogLevel.Warn && logMessage.Text.Contains("error reading packet", StringComparison.OrdinalIgnoreCase))
+                {
+                    ErrorOccurred?.Invoke(this, MpvError.LoadingFailed);
+                }
 
                 break;
             case MpvEventId.FileLoaded:
