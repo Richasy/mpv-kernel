@@ -245,4 +245,14 @@ public sealed partial class MpvClient
         await Task.Run(() => errorCode = MpvNative.SetOption(_handle, "demuxer-readahead-secs", MpvFormat.Int64, ref node));
         ThrowIfFailed(errorCode, "Mpv | set demuxer-readahead-secs failed");
     }
+
+    /// <summary>
+    /// 设置是否将图像字幕缩放到屏幕大小.
+    /// </summary>
+    public async Task SetStretchImageSubtitleToScreenAsync(bool enabled)
+    {
+        var errorCode = MpvError.Success;
+        await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "stretch-image-subs-to-screen", enabled ? "yes" : "no"));
+        ThrowIfFailed(errorCode, "Mpv | set stretch-image-subtitle-to-screen failed");
+    }
 }
