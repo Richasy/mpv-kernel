@@ -619,4 +619,42 @@ public sealed partial class MpvClient
 
         return Result.Ok(resultList);
     }
+
+    /// <summary>
+    /// 设置字幕位置.
+    /// </summary>
+    /// <param name="percentage">垂直方向百分比.</param>
+    /// <returns><see cref="Task"/>.</returns>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    public async Task SetSubtitlePositionAsync(int percentage)
+    {
+        if (percentage is < 0 or > 150)
+        {
+            throw new ArgumentOutOfRangeException(nameof(percentage), "Subtitle position must be between 0 and 150.");
+        }
+
+        var errorCode = MpvError.Success;
+        var node = new MpvNode(percentage);
+        await Task.Run(() => errorCode = MpvNative.SetOption(_handle, "sub-pos", MpvFormat.Int64, ref node));
+        ThrowIfFailed(errorCode, "Mpv | set subtitle position failed");
+    }
+
+    /// <summary>
+    /// 设置次要字幕位置.
+    /// </summary>
+    /// <param name="percentage">垂直方向百分比.</param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    public async Task SetSecondarySubtitlePositionAsync(int percentage)
+    {
+        if (percentage is < 0 or > 150)
+        {
+            throw new ArgumentOutOfRangeException(nameof(percentage), "Secondary subtitle position must be between 0 and 150.");
+        }
+
+        var errorCode = MpvError.Success;
+        var node = new MpvNode(percentage);
+        await Task.Run(() => errorCode = MpvNative.SetOption(_handle, "secondary-sub-pos", MpvFormat.Int64, ref node));
+        ThrowIfFailed(errorCode, "Mpv | set secondary subtitle position failed");
+    }
 }
