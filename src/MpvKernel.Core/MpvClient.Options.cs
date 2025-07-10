@@ -255,4 +255,15 @@ public sealed partial class MpvClient
         await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "stretch-image-subs-to-screen", enabled ? "yes" : "no"));
         ThrowIfFailed(errorCode, "Mpv | set stretch-image-subtitle-to-screen failed");
     }
+
+    /// <summary>
+    /// 设置目标颜色空间.
+    /// </summary>
+    public async Task SetTargetColorspaceHintAsync(bool? enabled)
+    {
+        var errorCode = MpvError.Success;
+        var opt = enabled == null ? "auto" : enabled == true ? "yes" : "no";
+        await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "target-colorspace-hint", opt));
+        ThrowIfFailed(errorCode, "Mpv | set target-colorspace-hint failed");
+    }
 }
