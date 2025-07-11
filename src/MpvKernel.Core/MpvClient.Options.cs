@@ -266,4 +266,22 @@ public sealed partial class MpvClient
         await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "target-colorspace-hint", opt));
         ThrowIfFailed(errorCode, "Mpv | set target-colorspace-hint failed");
     }
+
+    /// <summary>
+    /// 设置内置配置文件.
+    /// </summary>
+    public async Task SetBuiltInProfileAsync(string? profileName)
+    {
+        var errorCode = MpvError.Success;
+        if (string.IsNullOrEmpty(profileName))
+        {
+            await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "profile", "high-quality"));
+        }
+        else
+        {
+            await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "profile", profileName));
+        }
+
+        ThrowIfFailed(errorCode, "Mpv | set built-in profile failed");
+    }
 }
