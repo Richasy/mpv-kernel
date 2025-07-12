@@ -130,4 +130,14 @@ public enum MpvError
     /// Unspecified error.
     /// </summary>
     Generic = -20,
+
+    /// <summary>
+    /// Try to play blue-ray disc, but no disc was inserted.
+    /// </summary>
+    BluRayInitFailed = -101,
+
+    /// <summary>
+    /// Try to play DVD, but no DVD was inserted or the DVD device could not be opened.
+    /// </summary>
+    DvdInitFailed = -102,
 }

@@ -57,14 +57,28 @@ public sealed partial class MpvClient
                 System.Diagnostics.Debug.WriteLine($"[MPV] Log message: {logMessage.Level} - {logMessage.Text}");
 #endif
                 _logger.LogInformation($"[MPV] Log message: {logMessage.Level} - {logMessage.Text}");
-                if (logMessage.LogLevel == MpvLogLevel.Error && logMessage.Text.Contains("Subprocess failed: init", StringComparison.OrdinalIgnoreCase))
+                if (logMessage.LogLevel == MpvLogLevel.Warn)
                 {
-                    // 意味着播放失败，需要抛出该异常.
-                    ErrorOccurred?.Invoke(this, MpvError.VoInitFailed);
+                    if (logMessage.Text.Contains("error reading packet", StringComparison.OrdinalIgnoreCase))
+                    {
+                        ErrorOccurred?.Invoke(this, MpvError.LoadingFailed);
+                    }
                 }
-                else if (logMessage.LogLevel == MpvLogLevel.Warn && logMessage.Text.Contains("error reading packet", StringComparison.OrdinalIgnoreCase))
+                else if (logMessage.LogLevel == MpvLogLevel.Error)
                 {
-                    ErrorOccurred?.Invoke(this, MpvError.LoadingFailed);
+                    if (logMessage.Text.Contains("Subprocess failed: init", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // 意味着播放失败，需要抛出该异常.
+                        ErrorOccurred?.Invoke(this, MpvError.VoInitFailed);
+                    }
+                    else if (logMessage.Text.Contains("Couldn't open Blu-ray device", StringComparison.OrdinalIgnoreCase))
+                    {
+                        ErrorOccurred?.Invoke(this, MpvError.BluRayInitFailed);
+                    }
+                    else if (logMessage.Text.Contains("Couldn't open DVD device"))
+                    {
+                        ErrorOccurred?.Invoke(this, MpvError.DvdInitFailed);
+                    }
                 }
 
                 break;

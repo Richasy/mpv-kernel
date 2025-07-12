@@ -29,6 +29,11 @@ public sealed class MpvPlayOptions
     public double? InitialSpeed { get; set; }
 
     /// <summary>
+    /// 初始化额外加载器（比如使用蓝光还是DVD）
+    /// </summary>
+    public string? InitExtraLoader { get; set; }
+
+    /// <summary>
     /// 请求头，通常用于鉴权.
     /// </summary>
     public Dictionary<string, string>? HttpHeaders { get; set; }

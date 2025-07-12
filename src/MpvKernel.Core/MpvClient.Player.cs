@@ -23,8 +23,26 @@ public sealed partial class MpvClient
         }
 
         var errorCode = MpvError.Success;
-        List<string> commandArgs = ["loadfile", $"\"{filePath}\"", "replace", "0"];
+        var extension = Path.GetExtension(filePath).ToLowerInvariant();
+        List<string> commandArgs = [];
         List<string> commandOptions = [];
+        if (extension.StartsWith(".iso"))
+        {
+            var isBd = filePath.Contains("BD", StringComparison.Ordinal);
+            var preferLoader = options?.InitExtraLoader;
+            if (!string.IsNullOrEmpty(preferLoader))
+            {
+                isBd = string.Equals(preferLoader, "bd", StringComparison.OrdinalIgnoreCase);
+            }
+
+            commandArgs = ["loadfile", isBd ? "bd://" : "dvd://", "replace", "0"];
+            await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, isBd ? "bluray-device" : "dvd-device", filePath));
+            ThrowIfFailed(errorCode, "Mpv | set bluray/dvd device failed");
+        }
+        else
+        {
+            commandArgs = ["loadfile", $"\"{filePath}\"", "replace", "0"];
+        }
 
         if (options != null)
         {

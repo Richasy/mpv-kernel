@@ -62,6 +62,11 @@ public sealed partial class MpvPlayer : ObservableObject, IAsyncDisposable
                 _cachedSource.Options.StartPosition = await _historyResolver.GetStartPositionAsync();
             }
 
+            if (!string.IsNullOrEmpty(PreferExtraLoader))
+            {
+                _cachedSource.Options?.InitExtraLoader = PreferExtraLoader;
+            }
+
             Title = _cachedSource.Title;
         }
         catch (Exception ex)
@@ -167,6 +172,11 @@ public sealed partial class MpvPlayer : ObservableObject, IAsyncDisposable
         try
         {
             _cachedSource = await _sourceResolver.GetSourceAsync();
+            if (!string.IsNullOrEmpty(PreferExtraLoader))
+            {
+                _cachedSource.Options?.InitExtraLoader = PreferExtraLoader;
+            }
+
             Title = _cachedSource.Title;
         }
         catch (Exception ex)

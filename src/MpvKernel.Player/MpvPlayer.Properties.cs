@@ -39,6 +39,11 @@ public sealed partial class MpvPlayer
     public string? Id => _cachedSource?.Id;
 
     /// <summary>
+    /// 偏好的附加加载器.
+    /// </summary>
+    public string? PreferExtraLoader { get; set; }
+
+    /// <summary>
     /// 播放状态.
     /// </summary>
     [ObservableProperty]
@@ -120,5 +125,5 @@ public sealed partial class MpvPlayer
     /// 缓存速度.
     /// </summary>
     [ObservableProperty]
-    public partial long CacheSpeed { get; set; }
+    public partial long CacheSpeed { get; private set; }
 }
