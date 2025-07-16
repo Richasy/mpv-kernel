@@ -535,13 +535,15 @@ public sealed partial class MpvClient
         }
 
         var title = trackMeta.TryGetValue("title", out var titleNode) ? titleNode.StringValue : null;
-        var codec = trackMeta.TryGetValue("codecDesc", out var codecNode) ? codecNode.StringValue : null;
+        var codecDesc = trackMeta.TryGetValue("codecDesc", out var codecDescNode) ? codecDescNode.StringValue : null;
+        var codec = trackMeta.TryGetValue("codec", out var codecNode) ? codecDescNode.StringValue : null;
         var lang = trackMeta.TryGetValue("lang", out var langNode) ? langNode.StringValue : null;
         var track = new MpvTrackInfo
         {
             Type = MpvTrackType.Audio,
             Id = trackMeta.TryGetValue("id", out var idNode) ? Convert.ToInt32(idNode.IntegerValue) : -1,
-            Title = string.IsNullOrEmpty(codec) ? title : $"{title} ({codec})".Trim(),
+            Title = string.IsNullOrEmpty(codecDesc) ? title : $"{title} ({codecDesc})".Trim(),
+            Codec = codec,
             Language = lang,
             Current = true,
         };
@@ -570,11 +572,13 @@ public sealed partial class MpvClient
 
         var title = trackMeta.TryGetValue("title", out var titleNode) ? titleNode.StringValue : null;
         var lang = trackMeta.TryGetValue("lang", out var langNode) ? langNode.StringValue : null;
+        var codec = trackMeta.TryGetValue("codec", out var codecNode) ? codecNode.StringValue : null;
         var track = new MpvTrackInfo
         {
             Type = MpvTrackType.Subtitle,
             Id = trackMeta.TryGetValue("id", out var idNode) ? Convert.ToInt32(idNode.IntegerValue) : -1,
             Title = string.IsNullOrEmpty(lang) ? title : $"{title} ({lang})".Trim(),
+            Codec = codec,
             Current = true,
         };
         return Result.Ok(track);
@@ -674,5 +678,38 @@ public sealed partial class MpvClient
         var node = new MpvNode(percentage);
         await Task.Run(() => errorCode = MpvNative.SetOption(_handle, "secondary-sub-pos", MpvFormat.Int64, ref node));
         ThrowIfFailed(errorCode, "Mpv | set secondary subtitle position failed");
+    }
+
+    /// <summary>
+    /// 设置文本字幕字号
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    public async Task SetSubtitleFontSizeAsync(int fontSize)
+    {
+        if (fontSize < 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(fontSize), "Subtitle font size must greater than 0.");
+        }
+
+        var errorCode = MpvError.Success;
+        var node = new MpvNode(fontSize);
+        await Task.Run(() => errorCode = MpvNative.SetOption(_handle, "sub-font-size", MpvFormat.Int64, ref node));
+        ThrowIfFailed(errorCode, "Mpv | set subtitle font size failed");
+    }
+
+    /// <summary>
+    /// 设置字幕字体.
+    /// </summary>
+    /// <exception cref="ArgumentNullException"></exception>
+    public async Task SetSubtitleFontFamilyAsync(string fontFamily)
+    {
+        if (string.IsNullOrEmpty(fontFamily))
+        {
+            throw new ArgumentNullException(nameof(fontFamily), "Subtitle font family cannot be null or empty.");
+        }
+
+        var errorCode = MpvError.Success;
+        await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "sub-font", fontFamily));
+        ThrowIfFailed(errorCode, "Mpv | set subtitle font family failed");
     }
 }

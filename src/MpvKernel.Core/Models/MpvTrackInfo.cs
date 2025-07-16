@@ -40,6 +40,11 @@ public sealed class MpvTrackInfo
     /// </summary>
     public bool Current { get; set; }
 
+    /// <summary>
+    /// 解码器.
+    /// </summary>
+    public string? Codec { get; set; }
+
     /// <inheritdoc/>
     public override bool Equals(object? obj) => obj is MpvTrackInfo info && Id == info.Id;
 
