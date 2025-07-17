@@ -284,4 +284,27 @@ public sealed partial class MpvClient
 
         ThrowIfFailed(errorCode, "Mpv | set built-in profile failed");
     }
+
+    /// <summary>
+    /// 切换统计信息覆盖层.
+    /// </summary>
+    /// <returns><see cref="Task"/>.</returns>
+    public async Task ToggleStatsOverlayAsync()
+    {
+        var errorCode = MpvError.Success;
+        await Task.Run(() => errorCode = MpvNative.SetCommandString(_handle, "script-binding stats/display-stats-toggle"));
+        ThrowIfFailed(errorCode, "Mpv | toggle stats overlay failed");
+    }
+
+    /// <summary>
+    /// 发送按键事件到播放器.
+    /// </summary>
+    /// <param name="key"></param>
+    /// <returns></returns>
+    public async Task SendKeyPressAsync(string key)
+    {
+        var errorCode = MpvError.Success;
+        await Task.Run(() => errorCode = MpvNative.SetCommandString(_handle, $"keypress {key}"));
+        ThrowIfFailed(errorCode, "Mpv | send key press failed");
+    }
 }
