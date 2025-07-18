@@ -307,4 +307,15 @@ public sealed partial class MpvClient
         await Task.Run(() => errorCode = MpvNative.SetCommandString(_handle, $"keypress {key}"));
         ThrowIfFailed(errorCode, "Mpv | send key press failed");
     }
+
+    /// <summary>
+    /// 设置字幕延迟秒数.
+    /// </summary>
+    public async Task SetSubtitleDelaySecondsAsync(double seconds)
+    {
+        var errorCode = MpvError.Success;
+        var node = new MpvNode(Math.Round(seconds, 2));
+        await Task.Run(() => errorCode = MpvNative.SetOption(_handle, "sub-delay", MpvFormat.Double, ref node));
+        ThrowIfFailed(errorCode, "Mpv | Set subtitle delay seconds failed");
+    }
 }
