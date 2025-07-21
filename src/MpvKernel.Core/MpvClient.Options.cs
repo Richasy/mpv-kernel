@@ -318,4 +318,15 @@ public sealed partial class MpvClient
         await Task.Run(() => errorCode = MpvNative.SetOption(_handle, "sub-delay", MpvFormat.Double, ref node));
         ThrowIfFailed(errorCode, "Mpv | Set subtitle delay seconds failed");
     }
+
+    /// <summary>
+    /// 设置精确跳转类型.
+    /// </summary>
+    public async Task SetHrSeekAsync(HrSeekType type)
+    {
+        var errorCode = MpvError.Success;
+        var seekType = type.ToString().ToLowerInvariant();
+        await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "hr-seek", seekType));
+        ThrowIfFailed(errorCode, "Mpv | set hr-seek failed");
+    }
 }
