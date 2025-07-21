@@ -417,7 +417,7 @@ public sealed partial class MpvClient
         try
         {
             var waitTask = Task.Delay(TimeSpan.FromSeconds(8));
-            var subTask = Task.Run(() => errorCode = MpvNative.SetCommandString(_handle, $"sub-add {externalUrl} cached"));
+            var subTask = Task.Run(() => errorCode = MpvNative.SetCommandString(_handle, $"sub-add {externalUrl} select"));
             await Task.WhenAny(waitTask, subTask);
         }
         catch (Exception)
