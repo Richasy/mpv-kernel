@@ -66,7 +66,7 @@ public sealed partial class MpvClient
                 }
                 else if (logMessage.LogLevel == MpvLogLevel.Error)
                 {
-                    if (logMessage.Text.Contains("Subprocess failed: init", StringComparison.OrdinalIgnoreCase))
+                    if (logMessage.Text.Contains("Subprocess failed", StringComparison.OrdinalIgnoreCase))
                     {
                         // 意味着播放失败，需要抛出该异常.
                         ErrorOccurred?.Invoke(this, MpvError.VoInitFailed);

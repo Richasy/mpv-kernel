@@ -410,14 +410,15 @@ public sealed partial class MpvClient
     /// 设置外挂字幕轨道.
     /// </summary>
     /// <param name="externalUrl">字幕路径.</param>
+    /// <param name="flag">行为标记.</param>
     /// <returns><see cref="Task"/>.</returns>
-    public async Task<Result> SetExternalSubtitleTrackAsync(string externalUrl)
+    public async Task<Result> SetExternalSubtitleTrackAsync(string externalUrl, string flag = "select")
     {
         var errorCode = MpvError.Success;
         try
         {
             var waitTask = Task.Delay(TimeSpan.FromSeconds(8));
-            var subTask = Task.Run(() => errorCode = MpvNative.SetCommandString(_handle, $"sub-add {externalUrl} select"));
+            var subTask = Task.Run(() => errorCode = MpvNative.SetCommand(_handle, ["sub-add", externalUrl, flag]));
             await Task.WhenAny(waitTask, subTask);
         }
         catch (Exception)
@@ -711,5 +712,17 @@ public sealed partial class MpvClient
         var errorCode = MpvError.Success;
         await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "sub-font", fontFamily));
         ThrowIfFailed(errorCode, "Mpv | set subtitle font family failed");
+    }
+
+    /// <summary>
+    /// 移除字幕轨道.
+    /// </summary>
+    /// <param name="subtitleId">字幕 ID.</param>
+    /// <returns><see cref="Task"/>.</returns>
+    public async Task RemoveSubtitleAsync(string? subtitleId)
+    {
+        var errorCode = MpvError.Success;
+        await Task.Run(() => errorCode = MpvNative.SetCommandString(_handle, $"sub-remove {subtitleId ?? string.Empty}".Trim()));
+        ThrowIfFailed(errorCode, "Mpv | remove subtitle failed");
     }
 }
