@@ -15,4 +15,10 @@ public interface IMpvMediaSourceResolver
     /// </summary>
     /// <returns>播放链接及配置.</returns>
     public Task<MpvMediaSource> GetSourceAsync();
+
+    /// <summary>
+    /// 克隆一份实例，保留当前状态.
+    /// </summary>
+    /// <returns></returns>
+    public IMpvMediaSourceResolver Clone();
 }
