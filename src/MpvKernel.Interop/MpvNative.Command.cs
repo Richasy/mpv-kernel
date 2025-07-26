@@ -33,7 +33,7 @@ public static partial class MpvNative
     /// </para>
     /// </returns>
     [LibraryImport(MpvLibraryName, EntryPoint = "mpv_command", StringMarshalling = StringMarshalling.Utf8)]
-    public static partial MpvError SetCommand(MpvInteropHandle handle, string[] args);
+    public static partial MpvError SetCommand(MpvInteropHandle handle, nint args);
 
     /// <summary>
     /// Same as mpv_command, but uses input.conf parsing for splitting arguments.
@@ -140,7 +140,7 @@ public static partial class MpvNative
     /// <summary>
     /// Same as <see cref="SetCommandNode(MpvInteropHandle, ref MpvNode, out MpvNode)"/>, but run it asynchronously.
     /// Basically, this function is to <see cref="SetCommandNode(MpvInteropHandle, ref MpvNode, out MpvNode)"/> what <see cref="SetCommandAsync(MpvInteropHandle, ulong, string[])"/> is to
-    /// <see cref="SetCommand(MpvInteropHandle, string[])"/>.
+    /// <see cref="SetCommand(MpvInteropHandle, nint)"/>.
     ///
     /// <para>
     /// See <see cref="SetCommandAsync(MpvInteropHandle, ulong, string[])"/> for details.

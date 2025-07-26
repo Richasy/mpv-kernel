@@ -5,6 +5,8 @@ using FluentResults;
 using Richasy.MpvKernel.Core.Enums;
 using Richasy.MpvKernel.Core.Models;
 using System.Globalization;
+using System.Runtime.InteropServices;
+using System.Text;
 using static Richasy.MpvKernel.Core.Enums.MpvClientProperties;
 
 namespace Richasy.MpvKernel.Core;
@@ -418,7 +420,7 @@ public sealed partial class MpvClient
         try
         {
             var waitTask = Task.Delay(TimeSpan.FromSeconds(8));
-            var subTask = Task.Run(() => errorCode = MpvNative.SetCommand(_handle, ["sub-add", externalUrl, flag]));
+            var subTask = Task.Run(() => errorCode = SetCommandInternal(["sub-add", externalUrl, flag]));
             await Task.WhenAny(waitTask, subTask);
         }
         catch (Exception)
@@ -724,5 +726,29 @@ public sealed partial class MpvClient
         var errorCode = MpvError.Success;
         await Task.Run(() => errorCode = MpvNative.SetCommandString(_handle, $"sub-remove {subtitleId ?? string.Empty}".Trim()));
         ThrowIfFailed(errorCode, "Mpv | remove subtitle failed");
+    }
+
+    private MpvError SetCommandInternal(string[] args)
+    {
+        var count = args.Length + 1;
+        var pointers = new IntPtr[count];
+        var rootPtr = Marshal.AllocHGlobal(IntPtr.Size * count);
+
+        for (var index = 0; index < args.Length; index++)
+        {
+            var bytes = Encoding.UTF8.GetBytes(args[index] + "\0");
+            var ptr = Marshal.AllocHGlobal(bytes.Length);
+            Marshal.Copy(bytes, 0, ptr, bytes.Length);
+            pointers[index] = ptr;
+        }
+
+        Marshal.Copy(pointers, 0, rootPtr, count);
+        var err = MpvNative.SetCommand(Handle, rootPtr);
+
+        foreach (var ptr in pointers)
+            Marshal.FreeHGlobal(ptr);
+
+        Marshal.FreeHGlobal(rootPtr);
+        return err;
     }
 }
