@@ -167,7 +167,7 @@ public sealed partial class MpvPlayer : ObservableObject, IAsyncDisposable
     /// 重新播放当前媒体.
     /// </summary>
     /// <returns><see cref="Task"/>.</returns>
-    public async Task ReplayAsync()
+    public async Task ReplayAsync(double? preferPosition = null)
     {
         try
         {
@@ -175,6 +175,11 @@ public sealed partial class MpvPlayer : ObservableObject, IAsyncDisposable
             if (!string.IsNullOrEmpty(PreferExtraLoader))
             {
                 _cachedSource.Options?.InitExtraLoader = PreferExtraLoader;
+            }
+
+            if (preferPosition != null)
+            {
+                _cachedSource.Options?.StartPosition = preferPosition.Value;
             }
 
             Title = _cachedSource.Title;

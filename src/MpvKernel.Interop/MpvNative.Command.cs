@@ -2,38 +2,15 @@
 // Licensed under the MIT License.
 
 using System.Runtime.InteropServices;
+using System.Text;
 using static Richasy.MpvKernel.Constants;
 
 namespace Richasy.MpvKernel;
 
 public static partial class MpvNative
 {
-    /// <summary>
-    /// Send a command to the player. Commands are the same as those used in
-    /// input.conf, except that this function takes parameters in a pre-split
-    /// form.
-    /// <para>
-    /// The commands and their parameters are documented in input.rst.
-    /// </para>
-    /// <para>
-    /// Does not use OSD and string expansion by default (unlike <see cref="SetCommandString(MpvInteropHandle, string)"/>
-    /// and input.conf).
-    /// </para>
-    /// </summary>
-    /// <param name="handle">Client handle.</param>
-    /// <param name="args">
-    /// <para>
-    /// NULL-terminated list of strings. Usually, the first item
-    /// is the command, and the following items are arguments.
-    /// </para>
-    /// </param>
-    /// <returns>
-    /// <para>
-    /// Error code.
-    /// </para>
-    /// </returns>
     [LibraryImport(MpvLibraryName, EntryPoint = "mpv_command", StringMarshalling = StringMarshalling.Utf8)]
-    public static partial MpvError SetCommand(MpvInteropHandle handle, nint args);
+    private static partial MpvError SetCommand(MpvInteropHandle handle, nint args);
 
     /// <summary>
     /// Same as mpv_command, but uses input.conf parsing for splitting arguments.
@@ -198,4 +175,52 @@ public static partial class MpvNative
     /// <param name="replyUserData">ID of the request to be aborted (see above)</param>
     [LibraryImport(MpvLibraryName, EntryPoint = "mpv_abort_async_command")]
     public static partial void AbortAsyncCommand(MpvInteropHandle handle, ulong replyUserData);
+
+    /// <summary>
+    /// Send a command to the player. Commands are the same as those used in
+    /// input.conf, except that this function takes parameters in a pre-split
+    /// form.
+    /// <para>
+    /// The commands and their parameters are documented in input.rst.
+    /// </para>
+    /// <para>
+    /// Does not use OSD and string expansion by default (unlike <see cref="SetCommandString(MpvInteropHandle, string)"/>
+    /// and input.conf).
+    /// </para>
+    /// </summary>
+    /// <param name="handle">Client handle.</param>
+    /// <param name="args">
+    /// <para>
+    /// NULL-terminated list of strings. Usually, the first item
+    /// is the command, and the following items are arguments.
+    /// </para>
+    /// </param>
+    /// <returns>
+    /// <para>
+    /// Error code.
+    /// </para>
+    /// </returns>
+    public static MpvError SetCommand(MpvInteropHandle handle, string[] args)
+    {
+        var count = args.Length + 1;
+        var pointers = new IntPtr[count];
+        var rootPtr = Marshal.AllocHGlobal(IntPtr.Size * count);
+
+        for (var index = 0; index < args.Length; index++)
+        {
+            var bytes = Encoding.UTF8.GetBytes(args[index] + "\0");
+            var ptr = Marshal.AllocHGlobal(bytes.Length);
+            Marshal.Copy(bytes, 0, ptr, bytes.Length);
+            pointers[index] = ptr;
+        }
+
+        Marshal.Copy(pointers, 0, rootPtr, count);
+        var err = SetCommand(handle, rootPtr);
+
+        foreach (var ptr in pointers)
+            Marshal.FreeHGlobal(ptr);
+
+        Marshal.FreeHGlobal(rootPtr);
+        return err;
+    }
 }
