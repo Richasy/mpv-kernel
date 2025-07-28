@@ -79,6 +79,10 @@ public sealed partial class MpvClient
                     {
                         ErrorOccurred?.Invoke(this, MpvError.DvdInitFailed);
                     }
+                    else if (logMessage.Text.Contains("Failed to open http"))
+                    {
+                        ErrorOccurred?.Invoke(this, MpvError.VoInitFailed);
+                    }
                 }
 
                 break;
