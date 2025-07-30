@@ -329,4 +329,23 @@ public sealed partial class MpvClient
         await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "hr-seek", seekType));
         ThrowIfFailed(errorCode, "Mpv | set hr-seek failed");
     }
+
+    /// <summary>
+    /// 设置最大音量.
+    /// </summary>
+    /// <param name="volume"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    public async Task SetMaxVolumeAsync(int volume)
+    {
+        if (volume is < 100 or > 1000)
+        {
+            throw new ArgumentOutOfRangeException(nameof(volume), "Volume must be between 100 and 1000.");
+        }
+
+        var errorCode = MpvError.Success;
+        var node = new MpvNode(volume);
+        await Task.Run(() => errorCode = MpvNative.SetOption(_handle, "volume-max", MpvFormat.Int64, ref node));
+        ThrowIfFailed(errorCode, "Mpv | set max volume failed");
+    }
 }

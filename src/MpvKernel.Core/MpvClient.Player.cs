@@ -327,7 +327,7 @@ public sealed partial class MpvClient
     /// <exception cref="ArgumentOutOfRangeException">Thrown when the volume value is less than 0 or greater than 100.</exception>
     public async Task<Result> SetVolumeAsync(double volume)
     {
-        if (volume is < 0 or > 100)
+        if (volume is < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(volume), "Volume must be between 0 and 100.");
         }

@@ -220,6 +220,15 @@ public sealed partial class MpvPlayer : ObservableObject, IAsyncDisposable
         await Client.DisposeAsync();
     }
 
+    /// <summary>
+    /// 触发属性更改事件.
+    /// </summary>
+    /// <param name="propertyName">属性名称.</param>
+    public void RaisePropertyChanged(string propertyName)
+    {
+        _uiContext.Post(_ => OnPropertyChanged(propertyName), default);
+    }
+
     private void ResetProperties()
     {
         _uiContext.Post(_ =>
