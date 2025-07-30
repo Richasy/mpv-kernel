@@ -20,7 +20,6 @@ public sealed partial class MpvPlayer
     private readonly System.Timers.Timer _historyTimer;
 
     private MpvMediaSource? _cachedSource;
-    private bool _positionRecorded;
     private bool _isDisposed;
 
     /// <summary>

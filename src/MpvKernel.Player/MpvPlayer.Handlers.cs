@@ -15,12 +15,11 @@ public sealed partial class MpvPlayer
 
     private async void OnHistoryTimerElapsedAsync(object? sender, ElapsedEventArgs e)
     {
-        if (_historyResolver != null && !IsLoading && Duration > 0 && !_positionRecorded)
+        if (_historyResolver != null && !IsLoading && Duration > 0)
         {
             try
             {
                 await _historyResolver.SaveHistoryAsync(Position, Duration);
-                _positionRecorded = true;
             }
             catch (Exception ex)
             {
@@ -76,7 +75,6 @@ public sealed partial class MpvPlayer
                 _uiContext.Post(_ => Duration = (double)e.Data, default);
                 break;
             case MpvClientEventId.PositionChanged:
-                _positionRecorded = false;
                 _uiContext.Post(_ => Position = (double)e.Data, default);
                 break;
             case MpvClientEventId.FullScreenChanged:
