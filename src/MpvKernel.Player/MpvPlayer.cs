@@ -72,7 +72,8 @@ public sealed partial class MpvPlayer : ObservableObject, IAsyncDisposable
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to get media source.");
-            throw;
+            Client.ThrowError(MpvError.VoInitFailed);
+            return;
         }
 
         if (_isDisposed)
@@ -187,7 +188,8 @@ public sealed partial class MpvPlayer : ObservableObject, IAsyncDisposable
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to get media source.");
-            throw;
+            Client.ThrowError(MpvError.VoInitFailed);
+            return;
         }
 
         await Client.PlayAsync(_cachedSource.Url, _cachedSource.Options);
