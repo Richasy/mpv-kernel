@@ -95,7 +95,6 @@ public sealed partial class MpvClient
                     var stateResult = await GetPlayerStateAsync();
                     if (stateResult.IsFailed)
                     {
-                        _logger.LogError($"[MPV] Failed to get player state: {string.Join('\n', stateResult.Errors)}");
                         return;
                     }
 
@@ -133,7 +132,6 @@ public sealed partial class MpvClient
             var stateResult = await GetPlayerStateAsync();
             if (stateResult.IsFailed)
             {
-                _logger.LogError($"[MPV] Failed to get player state: {stateResult.Errors}");
                 return;
             }
 
