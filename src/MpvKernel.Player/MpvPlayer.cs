@@ -34,6 +34,8 @@ public sealed partial class MpvPlayer : ObservableObject, IAsyncDisposable
         _statusTimer.Elapsed += OnStatusTimerElapsedAsync;
         _historyTimer = new System.Timers.Timer(5000);
         _historyTimer.Elapsed += OnHistoryTimerElapsedAsync;
+        _progressTimer = new System.Timers.Timer(1000);
+        _progressTimer.Elapsed += OnProgressTimerElapsedAsync;
         PlaybackState = MpvPlayerState.Idle;
         Client.DataNotify += OnDataNotify;
         Client.ReachFileLoading += OnFileLoading;
@@ -133,12 +135,6 @@ public sealed partial class MpvPlayer : ObservableObject, IAsyncDisposable
             _uiContext.Post(_ => Duration = duration.Value, null);
         }
 
-        var position = await Client.GetCurrentPositionAsync();
-        if (position.IsSuccess)
-        {
-            _uiContext.Post(_ => Position = position.Value, null);
-        }
-
         var volume = await Client.GetVolumeAsync();
         if (volume.IsSuccess)
         {
@@ -219,6 +215,9 @@ public sealed partial class MpvPlayer : ObservableObject, IAsyncDisposable
         _historyTimer.Elapsed -= OnHistoryTimerElapsedAsync;
         _historyTimer.Stop();
         _historyTimer.Dispose();
+        _progressTimer.Elapsed -= OnProgressTimerElapsedAsync;
+        _progressTimer.Stop();
+        _progressTimer.Dispose();
         await Client.DisposeAsync();
     }
 

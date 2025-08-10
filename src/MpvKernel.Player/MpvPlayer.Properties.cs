@@ -18,6 +18,7 @@ public sealed partial class MpvPlayer
     private readonly SynchronizationContext _uiContext;
     private readonly System.Timers.Timer _statusTimer;
     private readonly System.Timers.Timer _historyTimer;
+    private readonly System.Timers.Timer _progressTimer;
 
     private MpvMediaSource? _cachedSource;
     private bool _isDisposed;

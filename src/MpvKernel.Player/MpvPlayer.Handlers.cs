@@ -13,9 +13,23 @@ public sealed partial class MpvPlayer
     private async void OnStatusTimerElapsedAsync(object? sender, ElapsedEventArgs e)
         => await RefreshStatusAsync();
 
+    private async void OnProgressTimerElapsedAsync(object? sender, ElapsedEventArgs e)
+    {
+        if (!Client.IsInitialized || Client.IsDisposed)
+        {
+            return;
+        }
+
+        var position = await Client.GetCurrentPositionAsync();
+        if (position.IsSuccess)
+        {
+            _uiContext.Post(_ => Position = position.Value, null);
+        }
+    }
+
     private async void OnHistoryTimerElapsedAsync(object? sender, ElapsedEventArgs e)
     {
-        if (_historyResolver != null && !IsLoading && Duration > 0)
+        if (_historyResolver != null && !IsLoading && Duration > 0 && !Client.IsDisposed)
         {
             try
             {
