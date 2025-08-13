@@ -49,6 +49,7 @@ public sealed partial class MpvPlayer
         Client.ReachFileLoading -= OnFileLoading;
         Client.ReachFileEnd -= OnFileEnd;
         Client.DataNotify -= OnDataNotify;
+        Client.ErrorOccurred -= OnErrorOccurred;
         var position = Position;
         _uiContext.Post(_ =>
         {
@@ -65,6 +66,11 @@ public sealed partial class MpvPlayer
 
     private void OnFileEnd(object? sender, EventArgs e)
     {
+        if (_isTlsError)
+        {
+            return;
+        }
+
         _uiContext.Post(_ =>
         {
             IsLoading = false;
@@ -101,6 +107,7 @@ public sealed partial class MpvPlayer
                 await InitializeTracksAsync();
                 break;
             case MpvClientEventId.PlaybackRestart:
+                _isTlsError = false;
                 _uiContext.Post(_ => IsPlaybackInitialized = true, default);
                 break;
             case MpvClientEventId.CacheSpeedChanged:
@@ -108,6 +115,14 @@ public sealed partial class MpvPlayer
                 break;
             default:
                 break;
+        }
+    }
+
+    private void OnErrorOccurred(object? sender, MpvError e)
+    {
+        if (e == MpvError.TlsError)
+        {
+            _isTlsError = true;
         }
     }
 

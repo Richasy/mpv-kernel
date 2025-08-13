@@ -140,4 +140,9 @@ public enum MpvError
     /// Try to play DVD, but no DVD was inserted or the DVD device could not be opened.
     /// </summary>
     DvdInitFailed = -102,
+
+    /// <summary>
+    /// Tls error.
+    /// </summary>
+    TlsError = -103,
 }

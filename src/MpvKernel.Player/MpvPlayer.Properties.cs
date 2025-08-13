@@ -22,6 +22,7 @@ public sealed partial class MpvPlayer
 
     private MpvMediaSource? _cachedSource;
     private bool _isDisposed;
+    private bool _isTlsError;
 
     /// <summary>
     /// 轨道加载事件.

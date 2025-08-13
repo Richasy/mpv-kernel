@@ -83,6 +83,10 @@ public sealed partial class MpvClient
                     {
                         ErrorOccurred?.Invoke(this, MpvError.VoInitFailed);
                     }
+                    else if (logMessage.Text.Contains("tls: IO error"))
+                    {
+                        ErrorOccurred?.Invoke(this, MpvError.TlsError);
+                    }
                 }
 
                 break;
