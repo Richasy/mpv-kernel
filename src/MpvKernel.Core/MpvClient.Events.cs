@@ -63,6 +63,10 @@ public sealed partial class MpvClient
                     {
                         ErrorOccurred?.Invoke(this, MpvError.LoadingFailed);
                     }
+                    else if (logMessage.Text.Contains("Failed to seek when reading header element", StringComparison.Ordinal))
+                    {
+                        ErrorOccurred?.Invoke(this, MpvError.TlsError);
+                    }
                 }
                 else if (logMessage.LogLevel == MpvLogLevel.Error)
                 {
@@ -83,7 +87,7 @@ public sealed partial class MpvClient
                     {
                         ErrorOccurred?.Invoke(this, MpvError.VoInitFailed);
                     }
-                    else if (logMessage.Text.Contains("tls: IO error"))
+                    else if (logMessage.Text.Contains("tls: IO error") || logMessage.Text.Contains("Seek failed"))
                     {
                         ErrorOccurred?.Invoke(this, MpvError.TlsError);
                     }
