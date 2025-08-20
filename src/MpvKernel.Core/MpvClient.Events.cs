@@ -91,6 +91,10 @@ public sealed partial class MpvClient
                     {
                         ErrorOccurred?.Invoke(this, MpvError.TlsError);
                     }
+                    else if(logMessage.Text.Contains("Passthrough format unsupported"))
+                    {
+                        ErrorOccurred?.Invoke(this, MpvError.PassthroughFormatUnsupported);
+                    }
                 }
 
                 break;

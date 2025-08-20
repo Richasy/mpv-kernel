@@ -145,4 +145,11 @@ public enum MpvError
     /// Tls error.
     /// </summary>
     TlsError = -103,
+
+    /// <summary>
+    /// <para>Passthrough format is unsupported. This error is returned when the</para>
+    /// <para>client tries to use a passthrough audio format that is not supported by</para>
+    /// <para>the current audio output.</para>
+    /// </summary>
+    PassthroughFormatUnsupported = -104,
 }

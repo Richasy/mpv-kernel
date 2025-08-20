@@ -725,4 +725,38 @@ public sealed partial class MpvClient
         await Task.Run(() => errorCode = MpvNative.SetCommandString(_handle, $"sub-remove {subtitleId ?? string.Empty}".Trim()));
         ThrowIfFailed(errorCode, "Mpv | remove subtitle failed");
     }
+
+    /// <summary>
+    /// 设置音频通道下混.
+    /// </summary>
+    /// <param name="enable">是否启用.</param>
+    /// <remarks>
+    /// 一些解码器，如 AC-3、AAC 和 DTS，可以在解码时重新混合音频。这 请求的输出通道数使用 --audio-channels 选项设置。 对于在立体声系统上播放环绕声很有用。
+    /// </remarks>
+    /// <returns><see cref="Task"/>.</returns>
+    public async Task SetAudioLavcDownmixAsync(bool enable)
+    {
+        var errorCode = MpvError.Success;
+        await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "ad-lavc-downmix", enable ? "yes" : "no"));
+        ThrowIfFailed(errorCode, "Mpv | set audio lavc downmix failed");
+    }
+
+    /// <summary>
+    /// 设置音频 SPDIF 解码器.
+    /// </summary>
+    /// <param name="decoders">解码器，可选值为 ac3、dts、dts-hd、eac3、truehd.</param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    public async Task SetAudioSpdifAsync(string[] decoders)
+    {
+        if (decoders == null || decoders.Length == 0)
+        {
+            throw new ArgumentNullException(nameof(decoders), "Decoders cannot be null or empty.");
+        }
+
+        var errorCode = MpvError.Success;
+        var decoderList = string.Join(',', decoders);
+        await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "audio-spdif", decoderList));
+        ThrowIfFailed(errorCode, "Mpv | set audio spdif failed");
+    }
 }
