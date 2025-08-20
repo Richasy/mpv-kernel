@@ -348,4 +348,16 @@ public sealed partial class MpvClient
         await Task.Run(() => errorCode = MpvNative.SetOption(_handle, "volume-max", MpvFormat.Int64, ref node));
         ThrowIfFailed(errorCode, "Mpv | set max volume failed");
     }
+
+    /// <summary>
+    /// 设置音频独占模式.
+    /// </summary>
+    /// <param name="enabled">是否启用.</param>
+    /// <returns><see cref="Task"/>.</returns>
+    public async Task SetAudioExclusiveAsync(bool enabled)
+    {
+        var errorCode = MpvError.Success;
+        await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "audio-exclusive", enabled ? "yes" : "no"));
+        ThrowIfFailed(errorCode, "Mpv | set audio-exclusive failed");
+    }
 }
