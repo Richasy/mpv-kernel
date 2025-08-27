@@ -62,4 +62,14 @@ public enum HardwareDecodeType
     /// 将视频复制回系统 RAM（仅限 Windows）
     /// </summary>
     Dxva2Copy,
+
+    /// <summary>
+    /// 需要 --vo=gpu 和 --gpu-context=d3d12 （仅限 Windows 10+）
+    /// </summary>
+    D3D12va,
+
+    /// <summary>
+    /// 将视频复制回系统 RAM（仅限 Windows 10+）
+    /// </summary>
+    D3D12vaCopy,
 }

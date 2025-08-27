@@ -94,6 +94,8 @@ public sealed partial class MpvClient
             HardwareDecodeType.VulkanCopy => "vulkan-copy",
             HardwareDecodeType.Dxva2 => "dxva2",
             HardwareDecodeType.Dxva2Copy => "dxva2-copy",
+            HardwareDecodeType.D3D12va => "d3d12va",
+            HardwareDecodeType.D3D12vaCopy => "d3d12va-copy",
             _ => throw new NotImplementedException(),
         };
         await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "hwdec", decode));
