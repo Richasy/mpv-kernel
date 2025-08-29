@@ -362,4 +362,14 @@ public sealed partial class MpvClient
         await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "audio-exclusive", enabled ? "yes" : "no"));
         ThrowIfFailed(errorCode, "Mpv | set audio-exclusive failed");
     }
+
+    /// <summary>
+    /// 加载脚本.
+    /// </summary>
+    public async Task LoadScriptAsync(string scriptPath)
+    {
+        var errorCode = MpvError.Success;
+        await Task.Run(() => errorCode = MpvNative.SetCommandString(_handle, $"load-script {scriptPath}"));
+        ThrowIfFailed(errorCode, "Mpv | set script-dir failed");
+    }
 }

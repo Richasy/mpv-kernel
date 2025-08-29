@@ -759,4 +759,23 @@ public sealed partial class MpvClient
         await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "audio-spdif", decoderList));
         ThrowIfFailed(errorCode, "Mpv | set audio spdif failed");
     }
+
+    /// <summary>
+    /// 设置平移扫描（主要用于去黑边）
+    /// </summary>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    public async Task SetPanscanAsync(double value)
+    {
+        if (value < 0 || value > 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(value), "Panscan value must be between 0 and 1.");
+        }
+
+        var errorCode = MpvError.Success;
+        var node = new MpvNode(value);
+        await Task.Run(() => errorCode = MpvNative.SetOption(_handle, "panscan", MpvFormat.Double, ref node));
+        ThrowIfFailed(errorCode, "Mpv | set panscan failed");
+    }
 }
