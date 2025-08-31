@@ -372,4 +372,24 @@ public sealed partial class MpvClient
         await Task.Run(() => errorCode = MpvNative.SetCommandString(_handle, $"load-script {scriptPath}"));
         ThrowIfFailed(errorCode, "Mpv | set script-dir failed");
     }
+
+    /// <summary>
+    /// 设置是否将缓存写入硬盘.
+    /// </summary>
+    public async Task SetCacheOnDiskAsync(bool enabled)
+    {
+        var errorCode = MpvError.Success;
+        await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "cache-on-disk", enabled ? "yes" : "no"));
+        ThrowIfFailed(errorCode, "Mpv | set cache-on-disk failed");
+    }
+
+    /// <summary>
+    /// 设置缓存目录.
+    /// </summary>
+    public async Task SetCacheDirAsync(string directory)
+    {
+        var errorCode = MpvError.Success;
+        await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "demuxer-cache-dir", directory));
+        ThrowIfFailed(errorCode, "Mpv | set demuxer-cache-dir failed");
+    }
 }
