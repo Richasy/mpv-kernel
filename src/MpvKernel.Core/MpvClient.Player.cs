@@ -494,7 +494,7 @@ public sealed partial class MpvClient
             var decoder = trackMeta.TryGetValue("decoder-desc", out var decoderNode) ? decoderNode.StringValue : null;
             var metadata = trackMeta.TryGetValue("metadata", out var metadataNode) ? MpvNodeList.ToDictionary(metadataNode.RemoteNodeListValue) : null;
             long? audioChannels = trackMeta.TryGetValue("audio-channels", out var audioChannelsNode) ? audioChannelsNode.IntegerValue : null;
-            var langString = string.IsNullOrEmpty(lang) ? default : new CultureInfo(lang).DisplayName;
+            var langString = string.IsNullOrEmpty(lang) ? default : TryGetCulture(lang)?.DisplayName;
             track.Title = track.Type switch
             {
                 MpvTrackType.Audio => string.IsNullOrEmpty(lang) ? title ?? codecDesc : $"{title} {codecDesc}".Trim(),
@@ -777,5 +777,17 @@ public sealed partial class MpvClient
         var node = new MpvNode(value);
         await Task.Run(() => errorCode = MpvNative.SetOption(_handle, "panscan", MpvFormat.Double, ref node));
         ThrowIfFailed(errorCode, "Mpv | set panscan failed");
+    }
+
+    private static CultureInfo? TryGetCulture(string language)
+    {
+        try
+        {
+            return new CultureInfo(language);
+        }
+        catch (CultureNotFoundException)
+        {
+            return null;
+        }
     }
 }
