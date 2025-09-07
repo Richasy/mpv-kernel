@@ -41,7 +41,7 @@ public sealed partial class MpvClient
         }
         else
         {
-            commandArgs = ["loadfile", $"\"{filePath}\"", "replace", "0"];
+            commandArgs = ["loadfile", $"\"{filePath.Replace("\"", "\\\"")}\"", "replace", "0"];
         }
 
         if (options != null)
@@ -135,7 +135,8 @@ public sealed partial class MpvClient
             commandArgs.Add(optionStr);
         }
 
-        await Task.Run(() => errorCode = MpvNative.SetCommandString(_handle, string.Join(' ', commandArgs)));
+        var cmd = string.Join(' ', commandArgs);
+        await Task.Run(() => errorCode = MpvNative.SetCommandString(_handle, cmd));
         ThrowIfFailed(errorCode, "Mpv | loadfile failed");
     }
 
