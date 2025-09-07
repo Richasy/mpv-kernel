@@ -431,6 +431,19 @@ public sealed partial class MpvClient
     }
 
     /// <summary>
+    /// 设置副字幕轨道.
+    /// </summary>
+    /// <param name="trackId">字幕 ID.</param>
+    /// <returns><see cref="Task"/>.</returns>
+    public async Task<Result> SetSecondarySubtitleTrackAsync(int? trackId)
+    {
+        var errorCode = MpvError.Success;
+        var node = trackId.HasValue ? new MpvNode(trackId.Value) : new MpvNode("no");
+        await Task.Run(() => errorCode = MpvNative.SetProperty(_handle, "secondary-sid", MpvFormat.Node, ref node));
+        return WrapAsResult(errorCode, "Mpv | set secondary subtitle track failed");
+    }
+
+    /// <summary>
     /// 设置音频轨道.
     /// </summary>
     /// <param name="trackId">音频ID.</param>

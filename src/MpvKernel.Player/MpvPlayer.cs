@@ -92,10 +92,18 @@ public sealed partial class MpvPlayer : ObservableObject, IAsyncDisposable
         if (alsoPlay)
         {
             CheckStateProperties();
-            await Client.PlayAsync(_cachedSource.Url, _cachedSource.Options);
-            if (PlaybackState == MpvPlayerState.Paused)
+            try
             {
-                await Client.ResumeAsync();
+                await Client.PlayAsync(_cachedSource.Url, _cachedSource.Options);
+                if (PlaybackState == MpvPlayerState.Paused)
+                {
+                    await Client.ResumeAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to play media.");
+                Client.ThrowError(MpvError.OptionError);
             }
         }
     }
@@ -180,6 +188,8 @@ public sealed partial class MpvPlayer : ObservableObject, IAsyncDisposable
             }
 
             Title = _cachedSource.Title;
+            await Client.PlayAsync(_cachedSource.Url, _cachedSource.Options);
+            await Client.ResumeAsync();
         }
         catch (Exception ex)
         {
@@ -187,9 +197,6 @@ public sealed partial class MpvPlayer : ObservableObject, IAsyncDisposable
             Client.ThrowError(MpvError.VoInitFailed);
             return;
         }
-
-        await Client.PlayAsync(_cachedSource.Url, _cachedSource.Options);
-        await Client.ResumeAsync();
     }
 
     /// <inheritdoc/>
