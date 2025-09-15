@@ -33,7 +33,7 @@ public sealed partial class MpvPlayer
         {
             try
             {
-                await _historyResolver.SaveHistoryAsync(Position, Duration);
+                await _historyResolver.SaveHistoryAsync(Position, Duration, PlaybackState);
             }
             catch (Exception ex)
             {

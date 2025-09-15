@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Richasy. All rights reserved.
 // Licensed under the MIT License.
 
+using Richasy.MpvKernel.Core.Enums;
+
 namespace Richasy.MpvKernel.Player;
 
 /// <summary>
@@ -18,5 +20,5 @@ public interface IMpvMediaHistoryResolver
     /// 保存历史记录.
     /// </summary>
     /// <returns><see cref="Task"/>.</returns>
-    public Task SaveHistoryAsync(double position, double duration, bool isExiting = false);
+    public Task SaveHistoryAsync(double position, double duration, MpvPlayerState state, bool isExiting = false);
 }
