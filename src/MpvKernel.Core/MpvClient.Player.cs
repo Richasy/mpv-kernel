@@ -793,6 +793,16 @@ public sealed partial class MpvClient
         ThrowIfFailed(errorCode, "Mpv | set panscan failed");
     }
 
+    /// <summary>
+    /// 截图到文件.
+    /// </summary>
+    public async Task TakeScreenshotAsync(string filePath)
+    {
+        var errorCode = MpvError.Success;
+        await Task.Run(() => errorCode = MpvNative.SetCommand(_handle, ["screenshot-to-file", filePath]));
+        ThrowIfFailed(errorCode, "Mpv | take screenshot failed");
+    }
+
     private static CultureInfo? TryGetCulture(string language)
     {
         try
