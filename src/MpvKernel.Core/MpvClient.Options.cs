@@ -392,4 +392,15 @@ public sealed partial class MpvClient
         await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "demuxer-cache-dir", directory));
         ThrowIfFailed(errorCode, "Mpv | set demuxer-cache-dir failed");
     }
+
+    /// <summary>
+    /// 设置静音.
+    /// </summary>
+    public async Task SetMuteAsync(bool isMute)
+    {
+        var errorCode = MpvError.Success;
+        var node = new MpvNode(isMute ? "yes" : "no");
+        await Task.Run(() => errorCode = MpvNative.SetOption(_handle, "mute", MpvFormat.String, ref node));
+        ThrowIfFailed(errorCode, "Mpv | set mute failed");
+    }
 }
