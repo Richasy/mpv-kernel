@@ -57,6 +57,7 @@ public sealed partial class MpvPlayer : ObservableObject, IAsyncDisposable
 
         try
         {
+            IsInternalLoading = true;
             ResetProperties();
             _cachedSource = await _sourceResolver.GetSourceAsync();
             if (_historyResolver != null)
@@ -73,11 +74,13 @@ public sealed partial class MpvPlayer : ObservableObject, IAsyncDisposable
         }
         catch (Exception ex)
         {
+            IsInternalLoading = false;
             _logger.LogError(ex, "Failed to get media source.");
             Client.ThrowError(MpvError.VoInitFailed);
             return;
         }
 
+        IsInternalLoading = false;
         if (_isDisposed)
         {
             return;

@@ -45,6 +45,11 @@ public sealed partial class MpvPlayer
     public string? PreferExtraLoader { get; set; }
 
     /// <summary>
+    /// 内部加载过程，无关 UI.
+    /// </summary>
+    public bool IsInternalLoading { get; set; }
+
+    /// <summary>
     /// 播放状态.
     /// </summary>
     [ObservableProperty]
