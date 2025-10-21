@@ -403,4 +403,22 @@ public sealed partial class MpvClient
         await Task.Run(() => errorCode = MpvNative.SetOption(_handle, "mute", MpvFormat.String, ref node));
         ThrowIfFailed(errorCode, "Mpv | set mute failed");
     }
+
+    /// <summary>
+    /// 设置字幕混合类型.
+    /// </summary>
+    public async Task SetBlendSubtitleAsync(SubtitleBlendType blendType)
+    {
+        var errorCode = MpvError.Success;
+        var blendStr = blendType switch
+        {
+            SubtitleBlendType.Yes => "yes",
+            SubtitleBlendType.Video => "video",
+            SubtitleBlendType.No => "no",
+            _ => "yes",
+        };
+
+        await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "blend-subtitles", blendStr));
+        ThrowIfFailed(errorCode, "Mpv | set blend-subtitles failed");
+    }
 }
