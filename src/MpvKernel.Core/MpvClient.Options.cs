@@ -297,7 +297,7 @@ public sealed partial class MpvClient
         await Task.Run(() => errorCode = MpvNative.SetCommandString(_handle, "script-binding stats/display-stats-toggle"));
         ThrowIfFailed(errorCode, "Mpv | toggle stats overlay failed");
     }
-    
+
     /// <summary>
     /// 发送按键事件到播放器.
     /// </summary>
@@ -433,5 +433,28 @@ public sealed partial class MpvClient
         var shadersStr = string.Join(';', shaders);
         await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "glsl-shaders", shadersStr));
         ThrowIfFailed(errorCode, "Mpv | set shaders failed");
+    }
+
+    /// <summary>
+    /// 设置 NVIDIA VSR (Video Super Resolution) 开关.
+    /// 需要 GPU 上下文为 d3d11 (--gpu-context=d3d11).
+    /// 推荐使用硬解码 (hwdec=d3d11va).
+    /// </summary>
+    /// <param name="enabled">是否启用 NVIDIA VSR.</param>
+    /// <param name="scale">缩放倍数，默认为 2.</param>
+    /// <returns><see cref="Task"/>.</returns>
+    public async Task SetNvidiaVsrAsync(bool enabled, int scale = 2)
+    {
+        var errorCode = MpvError.Success;
+
+        // 先移除已存在的 NVIDIA VSR 滤镜，避免重复添加
+        await Task.Run(() => MpvNative.SetCommandString(_handle, "vf remove @NVvsr"));
+
+        if (enabled)
+        {
+            var filterStr = $"@NVvsr:d3d11vpp=format=nv12:scale={scale}:scaling-mode=nvidia";
+            await Task.Run(() => errorCode = MpvNative.SetCommandString(_handle, $"vf append {filterStr}"));
+            ThrowIfFailed(errorCode, "Mpv | enable NVIDIA VSR failed");
+        }
     }
 }
