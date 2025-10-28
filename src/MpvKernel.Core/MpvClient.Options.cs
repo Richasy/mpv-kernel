@@ -443,7 +443,7 @@ public sealed partial class MpvClient
     /// <param name="enabled">是否启用 NVIDIA VSR.</param>
     /// <param name="scale">缩放倍数，默认为 2.</param>
     /// <returns><see cref="Task"/>.</returns>
-    public async Task SetNvidiaVsrAsync(bool enabled, int scale = 2)
+    public async Task SetNvidiaVsrAsync(bool enabled, double scale = 2)
     {
         var errorCode = MpvError.Success;
 
@@ -456,5 +456,29 @@ public sealed partial class MpvClient
             await Task.Run(() => errorCode = MpvNative.SetCommandString(_handle, $"vf append {filterStr}"));
             ThrowIfFailed(errorCode, "Mpv | enable NVIDIA VSR failed");
         }
+    }
+
+    /// <summary>
+    /// 设置 D3D11 适配器.
+    /// </summary>
+    /// <param name="adapterName"></param>
+    /// <returns></returns>
+    public async Task SetD3D11AdapterAsync(string adapterName)
+    {
+        var errorCode = MpvError.Success;
+        await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "d3d11-adapter", adapterName));
+        ThrowIfFailed(errorCode, "Mpv | set d3d11-adapter failed");
+    }
+
+    /// <summary>
+    /// 设置 Vulkan 设备.
+    /// </summary>
+    /// <param name="deviceName"></param>
+    /// <returns></returns>
+    public async Task SetVulkanDeviceAsync(string deviceName)
+    {
+        var errorCode = MpvError.Success;
+        await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "vulkan-device", deviceName));
+        ThrowIfFailed(errorCode, "Mpv | set vulkan-device failed");
     }
 }
