@@ -297,18 +297,7 @@ public sealed partial class MpvClient
         await Task.Run(() => errorCode = MpvNative.SetCommandString(_handle, "script-binding stats/display-stats-toggle"));
         ThrowIfFailed(errorCode, "Mpv | toggle stats overlay failed");
     }
-
-    /// <summary>
-    /// 切换着色器列表覆盖层显示状态.
-    /// </summary>
-    /// <returns><see cref="Task"/>.</returns>
-    public async Task ToggleShadersOverlayAsync()
-    {
-        var errorCode = MpvError.Success;
-        await Task.Run(() => errorCode = MpvNative.SetCommandString(_handle, "show-text ${glsl-shaders} 0"));
-        ThrowIfFailed(errorCode, "Mpv | toggle shaders overlay failed");
-    }
-
+    
     /// <summary>
     /// 发送按键事件到播放器.
     /// </summary>
