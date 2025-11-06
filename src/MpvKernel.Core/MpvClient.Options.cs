@@ -231,6 +231,18 @@ public sealed partial class MpvClient
     }
 
     /// <summary>
+    /// 设置 demuxer 后退最大字节数（视作后退缓冲容量）.
+    /// </summary>
+    /// <param name="byteSize">接受 KiB, MiB, GiB 作为单位后缀.</param>
+    /// <returns><see cref="Task"/>.</returns>
+    public async Task SetDemuxerMaxBackBytesAsync(string byteSize)
+    {
+        var errorCode = MpvError.Success;
+        await Task.Run(() => errorCode = MpvNative.SetOptionString(_handle, "demuxer-max-back-bytes", byteSize));
+        ThrowIfFailed(errorCode, "Mpv | set demuxer-max-back-bytes failed");
+    }
+
+    /// <summary>
     /// 设置 demuxer 读取头部的秒数（视作缓冲秒数）.
     /// </summary>
     /// <param name="seconds">秒数</param>
