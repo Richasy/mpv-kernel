@@ -59,6 +59,23 @@ public sealed partial class MpvClient
                 _logger.LogInformation($"[MPV] Log message: {logMessage.Level} - {logMessage.Text}");
                 if (logMessage.LogLevel == MpvLogLevel.Warn)
                 {
+                    if (logMessage.Text.Contains("HTTP error", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (logMessage.Text.Contains("404", StringComparison.OrdinalIgnoreCase))
+                        {
+                            ErrorOccurred?.Invoke(this, MpvError.Http404);
+                        }
+                        else if (logMessage.Text.Contains("403", StringComparison.OrdinalIgnoreCase))
+                        {
+                            ErrorOccurred?.Invoke(this, MpvError.Http403);
+                        }
+                        else if (logMessage.Text.Contains("500", StringComparison.OrdinalIgnoreCase))
+                        {
+                            ErrorOccurred?.Invoke(this, MpvError.Http500);
+                        }
+
+                        ErrorOccurred?.Invoke(this, MpvError.VoInitFailed);
+                    }
                     if (logMessage.Text.Contains("error reading packet", StringComparison.OrdinalIgnoreCase))
                     {
                         ErrorOccurred?.Invoke(this, MpvError.LoadingFailed);
@@ -91,7 +108,7 @@ public sealed partial class MpvClient
                     {
                         ErrorOccurred?.Invoke(this, MpvError.TlsError);
                     }
-                    else if(logMessage.Text.Contains("Passthrough format unsupported"))
+                    else if (logMessage.Text.Contains("Passthrough format unsupported"))
                     {
                         ErrorOccurred?.Invoke(this, MpvError.PassthroughFormatUnsupported);
                     }

@@ -152,4 +152,19 @@ public enum MpvError
     /// <para>the current audio output.</para>
     /// </summary>
     PassthroughFormatUnsupported = -104,
+
+    /// <summary>
+    /// HTTP 404 Not Found.
+    /// </summary>
+    Http404 = -105,
+
+    /// <summary>
+    /// HTTP 403 Forbidden.
+    /// </summary>
+    Http403 = -106,
+
+    /// <summary>
+    /// HTTP 500 Internal Server Error.
+    /// </summary>
+    Http500 = -107,
 }
