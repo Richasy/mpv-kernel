@@ -239,6 +239,22 @@ public sealed partial class MpvClient : IAsyncDisposable
                     };
                     errorCode = MpvNative.SetOptionString(_handle, "player-operation-mode", mode);
                 }
+
+                if (options.StreamLavfOptions?.Count > 0)
+                {
+                    var nodeList = MpvNodeList.CreateNodeMap(options.StreamLavfOptions);
+                    var node = new MpvNode(nodeList);
+                    errorCode = MpvNative.SetOption(_handle, "stream-lavf-o", MpvFormat.Node, ref node);
+                    ThrowIfFailed(errorCode, "Instance | set --stream-lavf-o failed");
+                }
+
+                if (options.DemuxerLavfOptions?.Count > 0)
+                {
+                    var nodeList = MpvNodeList.CreateNodeMap(options.DemuxerLavfOptions);
+                    var node = new MpvNode(nodeList);
+                    errorCode = MpvNative.SetOption(_handle, "demuxer-lavf-o", MpvFormat.Node, ref node);
+                    ThrowIfFailed(errorCode, "Instance | set --demuxer-lavf-o failed");
+                }
             }
 
             errorCode = MpvNative.Initialize(_handle);

@@ -39,4 +39,14 @@ public sealed class MpvInitializeOptions
     /// 同 <c>--player-operation-mode</c> 选项.
     /// </summary>
     public MpvPlayerOperationMode? PlayerOperationMode { get; set; }
+
+    /// <summary>
+    /// 同 <c>--stream-lavf-o</c> 选项.
+    /// </summary>
+    public Dictionary<string, string>? StreamLavfOptions { get; set; }
+
+    /// <summary>
+    /// 同 <c>--demuxer-lavf-o</c> 选项.
+    /// </summary>
+    public Dictionary<string, string>? DemuxerLavfOptions { get; set; }
 }

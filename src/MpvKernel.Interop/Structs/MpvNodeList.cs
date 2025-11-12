@@ -74,4 +74,37 @@ public struct MpvNodeList
     /// Convert to an array of <see cref="MpvNode"/>.
     /// </summary>
     public static Dictionary<string, MpvNode>? ToDictionary(MpvNodeList n) => (Dictionary<string, MpvNode>?)n;
+
+    /// <summary>
+    /// Creates a MPV_FORMAT_NODE_MAP from a dictionary of string key-value pairs.
+    /// </summary>
+    /// <param name="dict">Dictionary containing the key-value pairs.</param>
+    /// <returns>A MpvNodeList configured as a NODE_MAP.</returns>
+    public static MpvNodeList CreateNodeMap(Dictionary<string, string> dict)
+    {
+        var num = dict.Count;
+        var nodesPtr = Marshal.AllocCoTaskMem(Marshal.SizeOf<MpvNode>() * num);
+        var keysPtr = Marshal.AllocCoTaskMem(IntPtr.Size * num);
+
+        var i = 0;
+        foreach (var kvp in dict)
+        {
+            // Set node value
+            var node = new MpvNode(kvp.Value);
+            Marshal.StructureToPtr(node, nodesPtr + i * Marshal.SizeOf<MpvNode>(), false);
+
+            // Set key pointer
+            var keyPtr = Marshal.StringToCoTaskMemUTF8(kvp.Key);
+            Marshal.WriteIntPtr(keysPtr, i * IntPtr.Size, keyPtr);
+
+            i++;
+        }
+
+        return new MpvNodeList
+        {
+            Num = num,
+            _nodesPtr = nodesPtr,
+            _keysPtr = keysPtr
+        };
+    }
 }

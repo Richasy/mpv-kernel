@@ -54,9 +54,9 @@ public sealed partial class MpvClient
             case MpvEventId.LogMessage:
                 var logMessage = Marshal.PtrToStructure<MpvEventLogMessage>(@event.DataPtr);
 #if DEBUG
-                System.Diagnostics.Debug.WriteLine($"[MPV] Log message: {logMessage.Level} - {logMessage.Text}");
+                System.Diagnostics.Debug.WriteLine($"[{logMessage.Prefix}] Log message: {logMessage.Level} - {logMessage.Text}");
 #endif
-                _logger.LogInformation($"[MPV] Log message: {logMessage.Level} - {logMessage.Text}");
+                _logger.LogInformation($"[{logMessage.Prefix}] Log message: {logMessage.Level} - {logMessage.Text}");
                 if (logMessage.LogLevel == MpvLogLevel.Warn)
                 {
                     if (logMessage.Text.Contains("HTTP error", StringComparison.OrdinalIgnoreCase))
