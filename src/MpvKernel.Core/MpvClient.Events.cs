@@ -49,6 +49,12 @@ public sealed partial class MpvClient
                 ReachFileLoading?.Invoke(this, EventArgs.Empty);
                 break;
             case MpvEventId.EndFile:
+                var endFile = Marshal.PtrToStructure<MpvEventEndFile>(@event.DataPtr);
+                if (endFile.Reason == MpvEndFileReason.Error)
+                {
+                    ErrorOccurred?.Invoke(this, endFile.Error);
+                }
+
                 ReachFileEnd?.Invoke(this, EventArgs.Empty);
                 break;
             case MpvEventId.LogMessage:
