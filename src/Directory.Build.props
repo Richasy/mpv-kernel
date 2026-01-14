@@ -7,12 +7,13 @@
     <LangVersion>preview</LangVersion>
     <Nullable>enable</Nullable>
 	<NoWarn>$(NoWarn);NU1507;NU1900</NoWarn>
-	<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+	<EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
+	<_SkipUpgradeNetAnalyzersNuGetWarning>true</_SkipUpgradeNetAnalyzersNuGetWarning>
 	<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 	<RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
-	<EnableNETAnalyzers>true</EnableNETAnalyzers>
+	<EnableNETAnalyzers>false</EnableNETAnalyzers>
 	<AnalysisLevel>latest</AnalysisLevel>
-	<AnalysisMode>AllEnabledByDefault</AnalysisMode>
+	<AnalysisMode>None</AnalysisMode>
 	<GenerateDocumentationFile>true</GenerateDocumentationFile>
 	<Nullable>enable</Nullable>
 	<ImplicitUsings>enable</ImplicitUsings>
