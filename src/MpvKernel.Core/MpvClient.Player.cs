@@ -26,8 +26,10 @@ public sealed partial class MpvClient
         var extension = Path.GetExtension(filePath).ToLowerInvariant();
         List<string> commandArgs = [];
         List<string> commandOptions = [];
+        var useIsoDevice = false;
         if (extension.StartsWith(".iso"))
         {
+            useIsoDevice = true;
             var isBd = filePath.Contains("BD", StringComparison.Ordinal);
             var preferLoader = options?.InitExtraLoader;
             if (!string.IsNullOrEmpty(preferLoader))
@@ -41,7 +43,8 @@ public sealed partial class MpvClient
         }
         else
         {
-            commandArgs = ["loadfile", $"\"{filePath.Replace("\"", "\\\"")}\"", "replace", "0"];
+            // 使用数组形式的命令参数，不需要引号包裹，filePath 作为独立参数传递
+            commandArgs = ["loadfile", filePath, "replace", "0"];
         }
 
         if (options != null)
@@ -135,8 +138,18 @@ public sealed partial class MpvClient
             commandArgs.Add(optionStr);
         }
 
-        var cmd = string.Join(' ', commandArgs);
-        await Task.Run(() => errorCode = MpvNative.SetCommandString(_handle, cmd));
+        // 对于 ISO 文件使用字符串命令（URL 是 bd:// 或 dvd://，不含特殊字符）
+        // 对于其他文件使用数组形式的命令，避免 URL 中的特殊字符（如引号）导致解析问题
+        if (useIsoDevice)
+        {
+            var cmd = string.Join(' ', commandArgs);
+            await Task.Run(() => errorCode = MpvNative.SetCommandString(_handle, cmd));
+        }
+        else
+        {
+            await Task.Run(() => errorCode = MpvNative.SetCommand(_handle, [.. commandArgs]));
+        }
+
         ThrowIfFailed(errorCode, "Mpv | loadfile failed");
     }
 
