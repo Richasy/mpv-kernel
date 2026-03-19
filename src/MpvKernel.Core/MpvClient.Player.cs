@@ -24,7 +24,9 @@ public sealed partial class MpvClient
         _cachedDuration = default;
         _cachedSnapshot = new(filePath, options);
         var errorCode = MpvError.Success;
-        List<string> commandArgs = ["loadfile", $"\"{filePath}\"", "replace", "0"];
+        // 使用数组形式的命令参数，不需要引号包裹，filePath 作为独立参数传递
+        // 避免 URL 中的特殊字符（如引号）导致解析问题
+        List<string> commandArgs = ["loadfile", filePath, "replace", "0"];
         List<string> commandOptions = [];
 
         if (options != null)
@@ -88,7 +90,9 @@ public sealed partial class MpvClient
             commandArgs.Add(optionStr);
         }
 
-        await Task.Run(() => errorCode = MpvNative.SetCommandString(_handle, string.Join(' ', commandArgs)));
+        // 使用数组形式的命令 (mpv_command) 而非字符串命令 (mpv_command_string)
+        // 数组形式不需要转义特殊字符，可正确处理 URL 中的引号等字符
+        await Task.Run(() => errorCode = MpvNative.SetCommand(_handle, [.. commandArgs]));
         ThrowIfFailed(errorCode, "Mpv | loadfile failed");
     }
 
